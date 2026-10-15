@@ -1,0 +1,39 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>check</title></head>
+<body style="margin:0">
+<pre id="out">running</pre>
+<script>
+const W=[390,768,1440];
+const H={390:844,768:1024,1440:900};
+const CASES=[
+ ['onboard',null],['signup',null],['signin',null],['verify','free'],['otp','free'],['forgot',null],['checkEmail',null],['setPw',null],
+ ['home','guest'],['home','free'],['home','premium'],['servers','free'],['servers','premium'],['plans','free'],['checkout','free'],
+ ['processing','free'],['payfail','free'],['welcome','premium'],['receipt','premium'],['menu','guest'],['menu','free'],['menu','premium'],
+ ['account','free'],['editProfile','free'],['changePw','free'],['pwUpdated','free'],['deleted',null],['subscription','free'],['subscription','premium'],
+ ['cancelReason','premium'],['cancelSure','premium'],['settings','premium'],['split','premium'],['notifications','premium'],['protocol','premium'],
+ ['about','free'],['support','free'],['terms','free'],['update','free']];
+const out=[];
+async function run(){
+ for(const w of W){
+  const f=document.createElement('iframe');f.style.cssText=`width:${w}px;height:${H[w]}px;border:0`;f.src='/index.html';document.body.appendChild(f);
+  await new Promise(r=>f.onload=r);await new Promise(r=>setTimeout(r,200));
+  const win=f.contentWindow,doc=f.contentDocument;
+  const bad=[];
+  for(const [s,u] of CASES){
+   win.eval(`S.user=${JSON.stringify(u)};S.plan=${u==='premium'?"'year'":'null'};S.planSel='month';S.vpn='off';S.ov=null;S.coach=false;S.resetEmail='john@example.com';goRoot('${s}')`);
+   const de=doc.documentElement, over=[];
+   if(de.scrollWidth>de.clientWidth+1)over.push('page '+de.scrollWidth);
+   doc.querySelectorAll('.scr,.ph,#app').forEach(e=>{if(e.scrollWidth>e.clientWidth+1)over.push(e.className||e.id)});
+   const ph=doc.querySelector('.ph').getBoundingClientRect();
+   doc.querySelectorAll('.ph button,.ph a,.ph .btn,.ph .inp').forEach(e=>{const r=e.getBoundingClientRect();if(r.width&&(r.right>ph.right+1||r.left<ph.left-1))over.push('clip:'+(e.textContent||'').trim().slice(0,20))});
+   if(over.length)bad.push(s+'/'+u+': '+over.join(', '));
+  }
+  const brand=getComputedStyle(doc.querySelector('.brand')).display;
+  out.push(`${w}px: app ${Math.round(doc.querySelector('#app').getBoundingClientRect().width)}px, brand panel ${brand}, overflow issues: ${bad.length?'\n  '+bad.join('\n  '):'none'}`);
+  f.remove();
+ }
+ document.getElementById('out').textContent='RESULT\n'+out.join('\n');
+}
+run();
+</script>
+</body></html>

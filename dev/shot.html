@@ -1,0 +1,4 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;height:100%;overflow:hidden}iframe{width:100%;height:100%;border:0;display:block;margin:0 auto}</style></head><body>
+<iframe id="f" src="/index.html"></iframe><script>const qw=new URLSearchParams(location.search).get("w");if(qw)f.style.width=qw+"px"</script>
+<script>const q=new URLSearchParams(location.search);f.onload=()=>setTimeout(()=>{const w=f.contentWindow;w.eval(`S.user=${JSON.stringify(q.get('u'))};S.plan=S.user==='premium'?'year':null;S.coach=0;S.ov=null;${q.get('x')||''};goRoot('${q.get('s')}')`)},3400)</script>
+</body></html>

@@ -1,0 +1,1047 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0C1A4D">
+<title>VesperVPN</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="vesper.css">
+<style>
+/* ---------- app shell ---------- */
+html,body{height:100%;overflow-x:hidden}
+body{margin:0;background:#ECEFF4}
+#app{position:relative;max-width:430px;margin:0 auto;height:100dvh}
+.ph{width:100%!important;height:100dvh!important;border-radius:0!important;box-shadow:0 0 0 1px rgba(15,23,42,.06)!important;user-select:none;-webkit-tap-highlight-color:transparent}
+@media (max-width:430px){body{background:#fff}.ph{box-shadow:none!important}}
+.sb{display:none!important}
+.top-safe{height:max(16px,env(safe-area-inset-top));flex:none}
+.scr{flex:1;overflow-y:auto;overflow-x:hidden;position:relative;scrollbar-width:none}
+.scr::-webkit-scrollbar{display:none}
+button{font-family:inherit;cursor:pointer}
+a,[data-act]{cursor:pointer}
+.row>.btn{flex:1 1 0;width:auto;min-width:0}
+/* inputs */
+.inp input,.inp textarea{flex:1;border:0;outline:0;background:transparent;font:inherit;color:inherit;min-width:0;padding:0}
+.inp input::placeholder,.inp textarea::placeholder{color:var(--faint)}
+.inp:focus-within{border-color:var(--blue)}
+.inp.err:focus-within{border-color:#E5484D}
+.eye{border:0;background:none;padding:4px;color:var(--faint);display:flex}
+.inp.err .eye{color:var(--err)}
+.btn:disabled{background:#EEF1F6;color:#8A94A6;box-shadow:none;cursor:not-allowed}
+.errt:empty{display:none}
+.otp input{width:62px;height:62px;border-radius:16px;border:1.5px solid #8C8C8C;text-align:center;font:500 26px 'Plus Jakarta Sans',sans-serif;outline:0;color:var(--ink);background:#fff}
+.otp input:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(37,99,235,.25)}
+.otp.err input{border-color:#E5484D;background:var(--err-bg)}
+/* home: responsive, light like the design */
+.hero{top:max(12px,env(safe-area-inset-top));display:flex;flex-direction:column}
+.hero.g{top:48px}
+.hero.on{background:linear-gradient(165deg,#E5E2F4 0%,#EEEDF6 55%,#E7E4F3 100%);border-color:#DCD8EF}
+.hero.on .stat{color:var(--ink2)!important}
+.hero.on .r1{background:rgba(255,255,255,.35)}.hero.on .r2{background:rgba(255,255,255,.5)}
+.hero.on .pw{background:linear-gradient(180deg,#E4DDF6 0%,#C3B6EA 100%);color:#fff;box-shadow:0 20px 40px -18px rgba(91,72,160,.45);animation:none}
+.hero.cn{background:linear-gradient(165deg,#E7E5F3,#EFEEF6);border-color:#DFDCEE}
+.hero.cn .pw{background:linear-gradient(180deg,#E6E1F6,#C9BEEC);color:#374151}
+.vis{flex:1;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;min-height:200px;padding-top:30px}
+.vis .ring{top:50%!important;transform:translate(-50%,-56%)}
+.pw{position:relative!important;left:auto!important;top:auto!important;margin:0!important;flex:none;border:0;cursor:pointer}
+
+.pw .i{stroke-width:2.4}
+.stat{position:static!important}
+.card{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;margin:8px}
+@media (max-height:720px){.pw{width:128px!important;height:128px!important}.pw .i{width:50px!important;height:50px!important}.r1{width:400px!important;height:400px!important}.r2{width:260px!important;height:260px!important}}
+.fastp{display:inline-flex;align-items:center;gap:6px;border:1.5px solid #E2E8F0;background:#F6F8FB;border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600;color:var(--mute);flex:none}
+.qcc{border:0;font-family:inherit;cursor:pointer;color:var(--ink)}
+.qb{position:absolute;top:6px;right:calc(50% - 30px);width:20px;height:20px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.qb .i{width:12px;height:12px;stroke-width:2.4}
+/* motion */
+@keyframes up{from{transform:translateY(100%)}}
+@keyframes fade{from{opacity:0}}
+@keyframes pop{from{opacity:0;transform:translateY(-46%) scale(.96)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sheet{animation:up .3s cubic-bezier(.2,.8,.2,1)}
+.scrim{animation:fade .25s}
+.modal{animation:pop .25s ease}
+.screen-in{animation:fade .18s ease}
+/* ---------- accessibility layer (WCAG 2.2 AA) ---------- */
+:root{--faint:#5F6B7D;--mute:#556274;--err:#C21F1F;--err-bg:#FEF3F2}
+body{line-height:1.5}
+.h1,.h2,.h3,.logo{line-height:1.2}
+.small,.help,.errt,.li .st,.note,.feat,.plan .nm{font-size:14px}
+.sec,.hist,.chip,.plan .sub{font-size:14px}
+.pill,.pro,.qcc small{font-size:13px}
+.premcard .stats span{font-size:14px}
+.pill.gold{background:linear-gradient(135deg,#B45309,#92400E)}
+.hero.fail .stat span{color:#A3191C!important;font-weight:600}
+.card{gap:16px!important;padding:24px 20px 20px!important}
+.plan{padding:16px 18px}.feat{gap:9px}
+.eye{min-width:44px;min-height:44px;justify-content:center;align-items:center;margin-right:-10px}
+.lnk,.lbl a{display:inline-block;padding:4px 2px;margin:-4px -2px}
+.tog{min-width:50px;min-height:30px}
+:focus-visible{outline:3px solid #2563EB;outline-offset:2px;border-radius:8px}
+.inp:focus-within{box-shadow:0 0 0 3px rgba(37,99,235,.25)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.topalert{position:absolute;left:16px;right:16px;top:max(12px,env(safe-area-inset-top));z-index:6;background:#fff!important;border-color:#D6DEEC!important;box-shadow:0 16px 32px -16px rgba(8,15,38,.45);animation:alertDown .4s cubic-bezier(.2,.9,.3,1.15) .15s both;padding-right:6px!important;align-items:flex-start}
+.alert-x{width:44px;height:44px;margin:-10px -2px -10px 0;border:0;background:none;color:var(--mute);display:flex;align-items:center;justify-content:center;border-radius:50%;flex:none}
+@keyframes alertDown{from{opacity:0;transform:translateY(-120%)}}
+/* ---------- menu cards ---------- */
+.mcard{background:#fff;border:1px solid #E6EAF2;border-radius:22px;overflow:hidden;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.mrow{display:flex;align-items:center;gap:14px;padding:14px 16px;min-height:68px;color:var(--ink);text-decoration:none;position:relative;transition:background .15s}
+.mrow+.mrow:before{content:"";position:absolute;top:0;left:70px;right:16px;height:1px;background:#EEF1F6}
+.mrow:active{background:#F4F6FB}
+.mtile{width:40px;height:40px;border-radius:12px;background:var(--tint);color:var(--blue);display:flex;align-items:center;justify-content:center;flex:none}
+.mtile.violet{background:#F1ECFF;color:#5B3CC4}.mtile.amber{background:#FFF4E5;color:#B45309}.mtile.green{background:#E8F7EF;color:#047857}.mtile.rose{background:#FFEDF0;color:var(--err)}.mtile.slate{background:#EEF1F6;color:#475569}
+.mtx{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}.mt{font-size:16px;font-weight:600}.ms{font-size:13px;color:var(--mute);display:flex;align-items:center;gap:6px}
+.mlock{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--blue);background:var(--tint);border-radius:999px;padding:4px 9px}
+.mlock .i{width:13px;height:13px}
+.mlabel{font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--mute);text-transform:uppercase;margin:26px 4px 10px}
+.mhead{background:#fff;border:1px solid #E6EAF2;border-radius:24px;padding:18px;box-shadow:0 8px 24px -18px rgba(15,23,42,.35)}
+.mhead.prem{background:radial-gradient(80% 90% at 100% 0%,#3B5BFF 0%,transparent 60%),var(--grad-deep);border:0;color:#fff}
+.online{width:8px;height:8px;border-radius:50%;background:#16A34A;display:inline-block;box-shadow:0 0 0 3px rgba(22,163,74,.18)}
+/* ---------- accordion ---------- */
+.acc2{border-top:1px solid #EEF1F6}.acc2:first-child{border-top:0}
+.acc2 summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px;min-height:56px;font-size:16px;font-weight:600;color:var(--ink);cursor:pointer}
+.acc2 summary::-webkit-details-marker{display:none}
+.acc2 summary .i{color:var(--mute);transition:transform .25s}
+.acc2[open] summary .i{transform:rotate(180deg);color:var(--blue)}
+.acc2-b{padding:0 18px 18px;font-size:15px;line-height:1.7;color:var(--ink2)}
+.acc2[open] .acc2-b{animation:fadeUp .3s ease}
+/* ---------- server cities ---------- */
+.cname{flex:1;display:flex;flex-direction:column;gap:1px}.cname small{font-size:13px;font-weight:500;color:var(--mute)}
+.cities{padding:2px 0 12px 8px!important;gap:6px;animation:fadeUp .25s ease}
+.city{gap:12px;padding:10px 12px!important;min-height:56px;border-radius:14px!important;background:#F5F7FB!important;margin-top:0!important}
+.city.sel{background:var(--tint)!important;box-shadow:inset 0 0 0 1.5px var(--blue)}
+.pin{width:36px;height:36px;border-radius:50%;background:#fff;color:var(--blue);display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 1px 3px rgba(15,23,42,.08)}
+.cn{flex:1;display:flex;flex-direction:column;gap:1px}.cn b{font-size:15px;font-weight:600;color:var(--ink)}.cn small{font-size:13px;color:var(--mute)}
+.sig3{display:flex;align-items:flex-end;gap:2px;height:14px}.sig3 i{width:4px;border-radius:1px;background:#CBD5E1}.sig3 i:nth-child(1){height:5px}.sig3 i:nth-child(2){height:9px}.sig3 i:nth-child(3){height:14px}.sig3 i.on{background:#16A34A}
+/* ---------- support forms & chat ---------- */
+.chipb{background:#fff;font:inherit;font-size:14px;min-height:40px;padding:8px 16px;cursor:pointer;color:var(--ink2)}
+.chipb.on{background:var(--tint);border-color:var(--blue);color:var(--blue-d);font-weight:600}
+.bubble{max-width:80%;padding:12px 14px;border-radius:18px 18px 18px 6px;background:#fff;border:1px solid #E6EAF2;font-size:15px;line-height:1.5;color:var(--ink);animation:fadeUp .25s ease;align-self:flex-start}
+.bubble.me{align-self:flex-end;background:var(--grad);color:#fff;border:0;border-radius:18px 18px 6px 18px}
+.bubble.typing{display:flex;gap:4px;padding:16px}.bubble.typing i{width:7px;height:7px;border-radius:50%;background:#94A3B8;animation:blink 1s ease-in-out infinite}.bubble.typing i:nth-child(2){animation-delay:.15s}.bubble.typing i:nth-child(3){animation-delay:.3s}
+.chatbar{gap:10px;padding:12px 16px max(14px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#fff}
+.sendb{width:48px;height:48px;border-radius:50%;border:0;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+/* ---------- connecting: progress ring, radar sweep, orbiting dots ---------- */
+.prog{position:absolute;width:212px;height:212px;left:50%;top:50%;margin:-106px 0 0 -106px;transform:rotate(-90deg);pointer-events:none}
+.prog-bg{fill:none;stroke:rgba(47,107,255,.14);stroke-width:6}
+.prog-fg{fill:none;stroke:url(#pg);stroke-width:6;stroke-linecap:round;stroke-dasharray:629;stroke-dashoffset:629;animation:progFill 1.8s cubic-bezier(.4,0,.2,1) forwards;filter:drop-shadow(0 0 6px rgba(47,107,255,.6))}
+@keyframes progFill{to{stroke-dashoffset:0}}
+.sweep{position:absolute;left:50%;top:50%;width:420px;height:420px;margin:-210px 0 0 -210px;border-radius:50%;background:conic-gradient(from 0deg,rgba(47,107,255,0) 0deg,rgba(47,107,255,0) 280deg,rgba(47,107,255,.28) 350deg,rgba(47,107,255,0) 360deg);animation:spin 1.6s linear infinite;-webkit-mask:radial-gradient(circle,transparent 82px,#000 84px,#000 70%,transparent 71%);mask:radial-gradient(circle,transparent 82px,#000 84px,#000 70%,transparent 71%);pointer-events:none}
+.orbit{position:absolute;left:50%;top:50%;border-radius:50%;pointer-events:none;animation:spin linear infinite}
+.orbit i{position:absolute;top:-5px;left:50%;margin-left:-5px;width:10px;height:10px;border-radius:50%;background:#2F6BFF;box-shadow:0 0 12px 2px rgba(47,107,255,.7)}
+.orbit.o1{width:250px;height:250px;margin:-125px 0 0 -125px;animation-duration:1.4s}
+.orbit.o2{width:290px;height:290px;margin:-145px 0 0 -145px;animation-duration:2.1s;animation-direction:reverse}.orbit.o2 i{width:7px;height:7px;margin-left:-3.5px;background:#7FA2FF}
+.orbit.o3{width:330px;height:330px;margin:-165px 0 0 -165px;animation-duration:2.8s}.orbit.o3 i{width:6px;height:6px;margin-left:-3px;background:#A78BFA}
+.pwwrap.connecting .pw .i{animation:iconPulse 1s ease-in-out infinite}
+@keyframes iconPulse{50%{opacity:.45;transform:scale(.92)}}
+.cstat{display:flex;flex-direction:column;align-items:center;gap:2px}
+.cstat small{font-size:13px;color:var(--mute);font-weight:500}
+.cstat small.swap{animation:fadeUp .3s ease}
+.dots i{font-style:normal;animation:blink 1.2s infinite}.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
+.burst{display:none;position:absolute;inset:-6px;border-radius:50%;border:3px solid rgba(124,96,220,.6)}
+.fx-on .burst{display:block;animation:burst .8s ease-out forwards}
+@keyframes burst{from{transform:scale(.9);opacity:1}to{transform:scale(2.1);opacity:0}}
+/* ---------- onboarding carousel ---------- */
+.obview{overflow:hidden;flex:none;touch-action:pan-y;user-select:none}
+.obtrack{display:flex;transition:transform .55s cubic-bezier(.2,.8,.2,1)}
+.obslide{flex:0 0 100%;display:flex;flex-direction:column;align-items:center}
+.obphoto{position:relative;width:min(76%,300px);height:min(440px,50dvh);margin:22px auto 0}
+.obphoto img{width:100%;height:100%;object-fit:cover;border-radius:30px;display:block;box-shadow:0 24px 48px -28px rgba(15,23,42,.5)}
+.obpill{position:absolute;display:flex;align-items:center;gap:8px;background:rgba(238,242,251,.94);backdrop-filter:blur(8px);border-radius:999px;padding:9px 18px 9px 12px;font-size:16px;font-weight:500;color:var(--ink);white-space:nowrap;box-shadow:0 8px 20px -12px rgba(15,23,42,.4)}
+.obpill.tl{left:-34px;top:-14px}.obpill.br{right:-40px;bottom:12px}.obpill.tr{right:-26px;top:-10px}.obpill.bl{left:-30px;bottom:18px}
+.obslide .obpill{animation:pillIn .55s cubic-bezier(.2,.9,.3,1.3) .3s both,bob 4s ease-in-out 1s infinite}
+.obtext{align-items:center;gap:10px;margin-top:26px}
+.obdots{display:flex;justify-content:center;gap:2px;margin-top:14px}
+.obdot{width:30px;height:30px;border:0;background:none;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
+.obdot i{display:block;width:10px;height:10px;border-radius:5px;background:#9CA3AF;transition:width .3s,background .3s}
+.obdot.on{width:44px}.obdot.on i{width:32px;background:var(--grad)}
+/* ---------- coach marks: one shared style ---------- */
+.spot{position:absolute;z-index:20;pointer-events:none;box-shadow:0 0 0 9999px rgba(8,15,38,.55),0 0 0 3px rgba(255,255,255,.9)}
+.spot.light{box-shadow:0 0 0 9999px rgba(8,15,38,.18),0 0 0 3px rgba(67,97,238,.6)}
+.coach{position:absolute;z-index:21;background:#fff;border-radius:20px;padding:16px 18px 14px;box-shadow:0 24px 48px -16px rgba(8,15,38,.45);display:flex;flex-direction:column;gap:4px;animation:coachIn .35s cubic-bezier(.2,.9,.3,1.2)}
+.coach .carrow{position:absolute;top:-7px;width:16px;height:16px;margin-left:-8px;background:#fff;transform:rotate(45deg);border-radius:3px}
+.coach.above .carrow{top:auto;bottom:-7px}
+.cstep{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue)}
+.ctitle{font-size:18px;font-weight:700;color:var(--ink);line-height:1.3}
+.cbody{margin:0;font-size:15px;line-height:1.5;color:var(--mute)}
+.cfoot{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.cbtn{border:0;background:var(--grad);color:#fff;font:inherit;font-size:15px;font-weight:600;border-radius:999px;padding:0 20px;min-height:44px;cursor:pointer}
+.clink{border:0;background:none;font:inherit;font-size:14px;font-weight:600;color:var(--mute);min-height:44px;padding:0 6px;cursor:pointer}
+@keyframes coachIn{from{opacity:0;transform:translateY(8px) scale(.97)}}
+/* ---------- getting-started checklist ---------- */
+.setupbtn{position:absolute;top:14px;right:14px;z-index:3;width:52px;height:52px;border-radius:50%;border:0;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px -10px rgba(15,23,42,.4);cursor:pointer;padding:0}
+.setupbtn svg{position:absolute;inset:4px}.setupbtn span{font-size:12px;font-weight:700;color:var(--blue-d)}
+.setlist{display:flex;flex-direction:column;background:#F5F7FB;border-radius:20px;padding:4px 14px}
+.setitem{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #E6EAF2}.setitem:last-child{border-bottom:0}
+.setitem b{font-size:15px;font-weight:600}.setitem.done b{color:var(--mute);text-decoration:line-through}
+.setchk{width:26px;height:26px;border-radius:50%;border:2px solid #B8C3D6;display:flex;align-items:center;justify-content:center;flex:none;color:#fff}
+.setitem.done .setchk{background:var(--grad);border-color:transparent;animation:pwOn .45s ease}
+.setchk .i{width:15px;height:15px;stroke-width:2.8}
+.setgo{border:1.5px solid var(--blue);background:#fff;color:var(--blue-d);font:inherit;font-size:14px;font-weight:600;border-radius:999px;padding:0 14px;min-height:36px;cursor:pointer;flex:none}
+/* ---------- favorites ---------- */
+.srow{display:flex;align-items:center;gap:6px;padding:0!important;border-bottom:1px solid var(--line)}
+.srow-main{flex:1;display:flex;align-items:center;gap:16px;padding:16px 0;background:none;border:0;font:inherit;font-size:17px;font-weight:600;color:inherit;text-align:left;cursor:pointer;min-height:56px}
+.srow-main .flag{width:44px;height:30px;border-radius:7px}
+.fav,.chevb{width:44px;height:44px;border:0;background:none;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--mute);cursor:pointer;flex:none}
+.fav .i,.chevb .i{color:inherit!important}.fav.on{color:#E0245E}.fav.on .i{fill:#E0245E}
+.fav.pop .i{animation:heartPop .45s cubic-bezier(.2,.9,.3,1.5)}
+@keyframes heartPop{0%{transform:scale(.6)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+.srow.sk{padding:16px 0!important;gap:16px}
+.srow .lockb{display:flex;align-items:center;gap:8px;padding-right:10px;color:var(--mute)}
+/* ---------- splash timeline ---------- */
+.sp-shield{position:relative;z-index:1;animation:spIn .55s cubic-bezier(.2,.9,.3,1.35) both,spOut .4s ease-in 2.05s forwards}
+.sp-grad{opacity:0;animation:fadeTo .5s ease 1.25s forwards}
+.sp-check{stroke-dasharray:90;stroke-dashoffset:90;animation:draw .45s cubic-bezier(.6,0,.2,1) .7s forwards}
+.sp-glow{position:absolute;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(79,107,255,.55),transparent 65%);opacity:0;animation:glow 1.3s ease 1.2s forwards}
+.sp-logo{opacity:0;animation:logoIn .65s cubic-bezier(.2,.8,.2,1) 2.3s forwards}
+@keyframes spIn{from{opacity:0;transform:scale(.4) rotate(-8deg)}}
+@keyframes spOut{to{opacity:0;transform:scale(.55) translateY(-8px)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fadeTo{to{opacity:1}}
+@keyframes glow{0%{opacity:0;transform:scale(.6)}50%{opacity:1}100%{opacity:0;transform:scale(1.5)}}
+@keyframes logoIn{from{opacity:0;transform:translateY(14px) scale(.96);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+/* ---------- onboarding entry ---------- */
+.ob-art>div:first-child{animation:obArt .7s cubic-bezier(.2,.8,.2,1) both}
+.ob-pill{animation:pillIn .55s cubic-bezier(.2,.9,.3,1.3) .35s both,bob 4s ease-in-out 1s infinite}
+.ob-pill2{animation-delay:.5s,1.4s}
+.ob-copy{animation:fadeUp .6s ease .25s both}
+@keyframes obArt{from{opacity:0;transform:scale(.94)}}
+@keyframes pillIn{from{opacity:0;transform:translateY(10px) scale(.8)}}
+@keyframes bob{0%,100%{translate:0 0}50%{translate:0 -6px}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}}
+/* ---------- home motion ---------- */
+.pwwrap{position:relative;display:flex;align-items:center;justify-content:center}
+.pw{transition:transform .15s}.pw:active{transform:scale(.94)}
+.hero .r1{animation:breathe 5s ease-in-out infinite}.hero .r2{animation:breathe 5s ease-in-out .8s infinite}
+@keyframes breathe{0%,100%{transform:translate(-50%,-56%) scale(1)}50%{transform:translate(-50%,-56%) scale(1.045)}}
+.wave{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(47,107,255,.45);animation:wave 2s cubic-bezier(.2,.6,.3,1) infinite;pointer-events:none}
+.wave:nth-child(2){animation-delay:.66s}.wave:nth-child(3){animation-delay:1.33s}
+.pwwrap.on .wave{border-color:rgba(140,118,214,.35);animation-duration:3.2s}
+@keyframes wave{from{transform:scale(1);opacity:1}to{transform:scale(1.9);opacity:0}}
+.fx-on .pw{animation:pwOn .7s cubic-bezier(.2,.9,.3,1.4)!important}
+.fx-fail .pw{animation:shake .45s ease}
+.fx-off .pw{animation:pwOff .4s ease}
+.fx-on .stat,.fx-off .stat,.fx-fail .stat,.fx-connecting .stat{animation:fadeUp .35s ease}
+.fx-on .card .btn,.fx-off .card .btn,.fx-connecting .card .btn,.fx-fail .card .btn{animation:fadeTo .3s ease both;opacity:0}
+.fx-on .datap{animation:dropIn .45s cubic-bezier(.2,.9,.3,1.3)}
+.datap .dot{animation:blink 1.6s ease-in-out infinite}
+@keyframes pwOn{0%{transform:scale(.9)}55%{transform:scale(1.07)}100%{transform:scale(1)}}
+@keyframes pwOff{from{transform:scale(1.04)}}
+@keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+@keyframes dropIn{from{opacity:0;transform:translate(-50%,-14px)}}
+@keyframes blink{50%{opacity:.35}}
+.screen-in .hero .card{animation:fadeUp .5s cubic-bezier(.2,.8,.2,1) .05s both}
+.screen-in .qcc{animation:fadeUp .4s ease both}.screen-in .qcc:nth-child(2){animation-delay:.08s}.screen-in .qcc:nth-child(3){animation-delay:.16s}
+.screen-in .vis .pwwrap{animation:pwIn .6s cubic-bezier(.2,.9,.3,1.3) both}
+@keyframes pwIn{from{opacity:0;transform:scale(.8)}}
+.tip.w{animation:fadeUp .4s ease both}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.sp-shield{display:none}.sp-logo{opacity:1}}
+
+.spinner{width:44px;height:44px;position:relative;animation:spin 1s steps(8) infinite}
+.spinner i{position:absolute;left:20px;top:2px;width:4px;height:11px;border-radius:2px;background:var(--blue);transform-origin:2px 20px}
+.tog{border:0;cursor:pointer;transition:background .2s}.tog:after{transition:left .2s}
+.plan{cursor:pointer;width:100%;text-align:left;font-family:inherit;color:inherit}
+.feat .i{color:#16A34A!important}
+.stars button{border:0;background:none;padding:0;color:var(--gold)}
+.reason{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--line);font-size:17px;width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left;color:var(--ink)}
+.reason:last-child{border-bottom:0}
+.srow{width:100%;background:none;border-left:0;border-right:0;border-top:0;font-family:inherit;color:var(--ink);text-align:left;cursor:pointer}
+.cities{padding:0 0 10px 60px;display:flex;flex-direction:column}
+.city{display:flex;align-items:center;padding:12px 14px;border-radius:12px;font-size:15px;color:var(--ink2);background:var(--soft);margin-top:6px;border:0;width:100%;font-family:inherit;text-align:left}
+.li{cursor:default}
+a.li,.li[data-act]{cursor:pointer}
+.pmlogo{height:40px;padding:0 12px;border-radius:8px;background:#E3E8F8;display:flex;align-items:center;font-size:15px;font-weight:800;font-style:italic}
+.dot-li{display:flex;align-items:center;gap:12px;font-size:16px;font-weight:500;color:var(--ink)}
+.dot-li:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--grad)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="live" class="sr-only" aria-live="polite"></div>
+<script>
+/* ================= icons ================= */
+const I={
+eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+back:'<path d="M15 18l-6-6 6-6"/>',arrow:'<path d="M19 12H5M12 19l-7-7 7-7"/>',next:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+right:'<path d="M9 18l6-6-6-6"/>',down:'<path d="M6 9l6 6 6-6"/>',up:'<path d="M18 15l-6-6-6 6"/>',
+power:'<path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/>',
+home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M12 16v3"/>',
+server:'<rect x="3" y="4" width="18" height="7" rx="3.5"/><rect x="3" y="13" width="18" height="7" rx="3.5"/><path d="M7 7.5h.01M7 16.5h.01M11 7.5h6M11 16.5h6"/>',
+grid:'<rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/>',
+shield:'<path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+shieldx:'<path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="m9.5 9.5 5 5M14.5 9.5l-5 5"/>',
+shieldoff:'<path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M4 4l16 16"/>',
+check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',
+info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',alert:'<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16h.01"/>',
+warn:'<path d="M10.3 3.9 2.4 17.5A2 2 0 0 0 4.1 20.5h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/>',
+lock:'<rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>',
+mail:'<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 6.5 8.5 6 8.5-6"/>',
+refresh:'<path d="M20 11a8 8 0 0 0-14.7-4.3L3 9"/><path d="M3 4v5h5"/><path d="M4 13a8 8 0 0 0 14.7 4.3L21 15"/><path d="M21 20v-5h-5"/>',
+bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+bell:'<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
+star:'<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z"/>',
+crown:'<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',
+gift:'<rect x="3" y="8" width="18" height="5" rx="1"/><path d="M5 13v7h14v-7M12 8v12M12 8S10.5 3.5 8 4.5 9 8 12 8zM12 8s1.5-4.5 4-3.5S15 8 12 8z"/>',
+sparkle:'<path d="M12 3c.8 4.6 2.4 6.2 7 7-4.6.8-6.2 2.4-7 7-.8-4.6-2.4-6.2-7-7 4.6-.8 6.2-2.4 7-7z"/><path d="M19 3v4M17 5h4"/>',
+trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+logout:'<path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M9 16l-4-4 4-4M5 12h11"/>',
+doc:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>',
+headset:'<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/>',
+cloud:'<path d="M7 18a4.5 4.5 0 0 1-.5-9A6 6 0 0 1 18 8a4 4 0 0 1 0 10z"/><path d="M12 18v3M10 21h4"/>',
+monitor:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+torch:'<path d="M8 3h8v4l-2 3v11h-4V10L8 7z"/><path d="M8 7h8M12 13v2"/>',
+cal:'<rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+card:'<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 10h18"/>',
+tag:'<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8" r="1.2"/>',
+camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+pencil:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',chat:'<path d="M4 12a8 8 0 1 1 3.5 6.6L4 20l1.3-3.6A8 8 0 0 1 4 12z"/>',
+phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/><path d="M15 3a6 6 0 0 1 6 6M15 7a2 2 0 0 1 2 2"/>',
+wifioff:'<path d="M3 3l18 18M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 5-2.7M14 10.3A10 10 0 0 1 19 13M2 9.5a15 15 0 0 1 4.5-2.8M10.5 5.1A15 15 0 0 1 22 9.5M12 20h.01"/>',
+heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',receipt:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M12 7v8M14 9h-3a1.5 1.5 0 0 0 0 3h2a1.5 1.5 0 0 1 0 3h-3"/>',
+xc:'<circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/>',
+play:'<path d="M8 5v14l11-7z" fill="currentColor"/>',
+pin:'<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+send:'<path d="M4 12 20 4l-6 16-3-7z"/><path d="M11 13l9-9"/>',
+briefcase:'<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>',
+sliders:'<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>'
+};
+const ic=(n,c='',st='')=>`<svg class="i ${c}" style="${st}" viewBox="0 0 24 24" aria-hidden="true">${I[n]}</svg>`;
+const shieldSvg=(fill,check)=>`<svg viewBox="0 0 160 192" width="80" height="96" aria-hidden="true"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8FB0FF"/><stop offset="1" stop-color="#2563EB"/></linearGradient></defs><path d="M70 6a28 28 0 0 1 20 0l46 17a24 24 0 0 1 16 22v78a24 24 0 0 1-10 19l-50 37a24 24 0 0 1-28 0L14 142A24 24 0 0 1 4 123V45a24 24 0 0 1 16-22z" fill="${fill}"/>${check?'<path d="M52 100l18 18 40-40" fill="none" stroke="#0E1F5C" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>':''}</svg>`;
+
+/* ================= data ================= */
+const COUNTRIES=[['au','Australia',['Melbourne','Sydney','Perth'],1],['at','Austria',['Vienna','Salzburg'],1],['be','Belgium',['Brussels','Antwerp'],1],
+['bg','Bulgaria',['Sofia']],['ca','Canada',['Toronto','Vancouver','Montreal']],['cl','Chile',['Santiago']],['cn','China',['Shanghai','Beijing']],['cr','Costa-rica',['San José']],
+['cz','Czechia',['Prague','Brno']],['dk','Denmark',['Copenhagen']],['de','Germany',['Frankfurt','Berlin','Munich']],['jp','Japan',['Tokyo','Osaka']],['sg','Singapore',['Singapore']],
+['gb','United Kingdom',['London','Manchester']],['us','United States',['New York','Los Angeles','Miami','Chicago']]];
+const latency=(c,k)=>{const city=(COUNTRIES.find(x=>x[0]===c)||[0,0,[]])[2][k]||'';let h=7;for(const ch of c+city)h=(h*131+ch.charCodeAt(0))%9973;return 18+h%140};
+const bars=ms=>{const n=ms<60?3:ms<110?2:1;return `<span class="sig3" aria-hidden="true">${[1,2,3].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('')}</span>`};
+const PLANS=[
+{id:'free',nm:'Free',sub:'1 GB / day',cta:'Continue With Free',note:'Limited · upgrade anytime',f:['1 GB data per day (20 GB/mo cap)','Full speed · never throttled','1 device','5 server locations']},
+{id:'week',nm:'1 Week',pr:'$2.99/wk',price:'$2.99',cta:'Get 1-Week Plan',note:'Then $2.99/wk · Cancel anytime',f:['All 50+ countries – no restrictions','Unlimited data','1 device','All 50+ server locations','Streaming supported','Cancel anytime']},
+{id:'month',nm:'1 Month',pr:'$7.99/mo',price:'$7.99',badge:'MOST POPULAR',cta:'Get 1-Month Plan',note:'Then $7.99/mo · Cancel anytime',f:['All 50+ countries – no restrictions','Unlimited data','2 simultaneous devices','All 50+ server locations','Full streaming (Netflix, etc.)','Cancel anytime']},
+{id:'m3',nm:'3 Months',pr:'$17.99',sub:'$6.00/mo',price:'$17.99',cta:'Get 3-Month Plan',note:'Then $17.99 · Cancel anytime',f:['All 50+ countries – no restrictions','Unlimited data','3 simultaneous devices','All 50+ server locations','Full streaming','Save 25% vs monthly','Cancel anytime']},
+{id:'m6',nm:'6 Months',pr:'$24.99',sub:'$4.17/mo',price:'$24.99',cta:'Get 6-Month Plan',note:'Then $24.99 · Cancel anytime',f:['All 50+ countries – no restrictions','Unlimited data','5 simultaneous devices','All 50+ server locations','Full streaming','Save 48% vs monthly','Cancel anytime']},
+{id:'year',nm:'1 Year',pr:'$0.00',was:'$39.99/yr',trial:1,price:'$0.00',badge2:'BEST VALUE',cta:'Start 7-Day Free Trial',note:'$0.00 today · then $39.99/yr · Cancel anytime',f:['All 50+ countries – no restrictions','Unlimited data – no daily cap','5 simultaneous devices','Full streaming (Netflix, Spotify, etc.)','Cancel anytime – no questions asked']}];
+const planOf=id=>PLANS.find(p=>p.id===id);
+const quick=()=>[...S.fav.map(x=>({...x,b:'heart'})),...S.qc.filter(x=>!S.fav.some(f=>f.c===x.c)).map(x=>({...x,b:'clock'}))].slice(0,3);
+const isFav=c=>S.fav.some(f=>f.c===c);
+
+/* ================= state =================
+   One persisted store `S`. Per-person data lives in a profile
+   (each account, or the guest) so nothing leaks between users.
+   Bridged keys on S (S.plan, S.qc, S.data…) read/write the active profile. */
+const STORE_KEY='vesper:v2';
+const today=()=>new Date().toDateString();
+const QUOTA={guest:500,free:1024};
+const newProfile=(o={})=>Object.assign({pw:'',name:'Demo User',phone:'+1 234 567 8900',premium:false,plan:null,cancelled:false,trialEnded:false,qc:[],fav:[],data:QUOTA.free,day:today(),
+  seen:{trial:false,notif:false,rateHome:false,rateMenu:false}},o);
+const DEF={v:2,screen:'splash',hist:[],ov:null,
+  session:null,email:'',accounts:{'demouser@email.com':newProfile({pw:'password123'})},guest:newProfile({data:QUOTA.guest}),
+  vpn:'off',since:0,perm:false,loc:null,
+  tour:null,ob:0,planSel:null,stars:0,otpFor:'signup',otpErr:false,resetEmail:'',pending:null,signVariant:0,reason:0,info:null,proto:'oc',protoHelp:'oc',faq:0,search:false,q:'',exp:null,
+  set:{kill:true,auto:true},split:{Chrome:true,Instagram:false,YouTube:true,Spotify:false,WhatsApp:true,Netflix:false},
+  notif:{vpnd:true,cfail:true,auto:false,trial:true,pay:true,offer:false,upd:false,tips:false},
+  chat:[],topic:null,teamSize:null,sentEmail:null,salesSent:null,ticket:0,agree:false,coName:'Alex Johnson',coEmail:'alex@gmail.com',guestTipShow:false,hintShown:false};
+const TRANSIENT=['srvLoading','srvErr','srvSeen','guestHint','fx','favPop','limitNoteHidden','connAt','chatTyping','setupCelebrate'];   // UI-only, never saved
+let S;
+try{const saved=JSON.parse(localStorage.getItem(STORE_KEY)||'null');S=Object.assign(JSON.parse(JSON.stringify(DEF)),saved&&saved.v===2?saved:{})}catch(e){S=JSON.parse(JSON.stringify(DEF))}
+if(S.screen==='processing')S.screen='checkout';          // payment never resumes after a reload
+if(S.vpn==='connecting')S.vpn='off';                      // a half-finished connect is dropped
+const ANON=newProfile();
+function profile(){
+  const p=S.session==='guest'?S.guest:S.session==='user'?S.accounts[S.email]:null;
+  if(!p)return ANON;
+  if(!p.fav)p.fav=[];
+  if(p.day!==today()){p.day=today();p.data=S.session==='guest'?QUOTA.guest:QUOTA.free}   // daily free-data reset
+  return p;
+}
+Object.defineProperty(S,'user',{enumerable:false,
+  get(){if(S.session==='guest')return 'guest';const a=S.session==='user'&&S.accounts[S.email];return a?(a.premium?'premium':'free'):null},
+  set(v){if(!v)S.session=null;else if(v==='guest')S.session='guest';else{S.session='user';const a=S.accounts[S.email];if(a)a.premium=v==='premium'}}});
+['name','phone','plan','cancelled','trialEnded','qc','fav','data'].forEach(k=>Object.defineProperty(S,k,{enumerable:false,get:()=>profile()[k],set:v=>{profile()[k]=v}}));
+[['trialShown','trial'],['notifAsked','notif'],['rateHome','rateHome'],['rateMenu','rateMenu']].forEach(([k,f])=>Object.defineProperty(S,k,{enumerable:false,get:()=>profile().seen[f],set:v=>{profile().seen[f]=!!v}}));
+let saveT;
+function save(now){clearTimeout(saveT);const w=()=>{try{const o={};for(const k of Object.keys(S))if(!TRANSIENT.includes(k))o[k]=S[k];localStorage.setItem(STORE_KEY,JSON.stringify(o))}catch(e){}};now?w():saveT=setTimeout(w,150)}
+
+/* named timers — cleared together so no stale callback fires on a new state */
+const T={};
+const later=(k,fn,ms)=>{clearTimeout(T[k]);T[k]=setTimeout(()=>{delete T[k];fn()},ms)};
+const stop=k=>{clearTimeout(T[k]);delete T[k]};
+
+/* ================= shared components ================= */
+const $=s=>document.querySelector(s);
+const safeTop=()=>`<div class="top-safe"></div>`;
+const logo=(st='')=>`<p class="logo" style="${st}">Vesper<b>VPN</b></p>`;
+const tabs=a=>`<nav class="tabs">${[['home','home','Home'],['servers','server','Server List'],['menu','grid','Menu']].map(([s,i,l])=>`<a class="tab ${a===s?'on':''}" data-act="tab" data-arg="${s}">${s==='home'&&a==='home'?`<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" fill="var(--blue)" stroke="var(--blue)"/><path d="M12 16v3" stroke="#fff"/></svg>`:ic(i)}${l}</a>`).join('')}</nav>`;
+const backBack=()=>`<a class="back" data-act="back">${ic('back')}Back</a>`;
+const backTitle=t=>`<a class="back" data-act="back" style="font-size:26px;font-weight:700">${ic('back')}${t}</a>`;
+const arrowTitle=t=>`<div class="topbar"><a data-act="back" aria-label="Back" style="color:var(--ink)">${ic('arrow')}</a><h1 class="h2">${t}</h1></div>`;
+const arrowLogo=()=>`<div class="row" style="padding:6px 20px;position:relative;justify-content:center"><a data-act="back" aria-label="Back" style="position:absolute;left:20px;color:var(--ink)">${ic('arrow')}</a><p class="logo sm">Vesper<b>VPN</b></p></div>`;
+const flag=c=>`<span class="flag f-${c}" aria-hidden="true"></span>`;
+const fld=(label,id,o={})=>`<div class="field" style="${o.fst||''}"><label class="lbl" for="${id}" style="${o.lst||''}">${label}${o.right||''}</label><div class="inp ${o.cls||''}" id="w-${id}"><input id="${id}" type="${o.type||'text'}" placeholder="${o.ph||''}" value="${o.val||''}" ${o.ro?'readonly':''} autocomplete="off">${o.type==='password'?`<button class="eye" type="button" data-act="eye" data-arg="${id}" aria-label="Show password">${ic('eye')}</button>`:''}</div>${o.strength?`<div class="str" id="st-${id}">${'<i></i>'.repeat(o.strength)}</div><p class="help" id="sl-${id}">Strength</p>`:o.help?`<p class="help" id="sl-${id}">${o.help}</p>`:''}<p class="${o.greyErr?'help':'errt'}" id="e-${id}"></p></div>`;
+const val=id=>($('#'+id)||{}).value||'';
+const setErr=(id,m)=>{const w=$('#w-'+id),e=$('#e-'+id),i=$('#'+id);if(w)w.classList.toggle('err',!!m);if(e)e.textContent=(m||'').trim();if(i){i.setAttribute('aria-invalid',m?'true':'false');if(e)i.setAttribute('aria-describedby','e-'+id)}};
+const emailOk=v=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)||/^\+?[0-9 ]{8,}$/.test(v);
+const strength=v=>Math.min(4,(v.length>=8)+(/[A-Z]/.test(v))+(/[0-9]/.test(v))+(/[^A-Za-z0-9]/.test(v)));
+const fmt=ms=>{const s=Math.floor(ms/1000);return [s/3600|0,(s/60|0)%60,s%60].map(n=>String(n).padStart(2,'0')).join(':')};
+const isFree=()=>S.user!=='premium';
+const toggle=(on,act,arg,label)=>`<button class="tog ${on?'on':''}" role="switch" data-act="${act}" data-arg="${arg}" aria-checked="${on}" aria-label="${label||arg}"></button>`;
+const sheet=(h,o={})=>`<div class="scrim" data-act="${o.lock?'':'close'}"></div><div class="sheet" style="${o.st||''}">${o.nograb?'':'<div class="grab"></div>'}${h}</div>`;
+const modal=(h,st='')=>`<div class="scrim" data-act="close"></div><div class="modal" style="${st}">${h}</div>`;
+
+/* ================= SCREENS ================= */
+const SC={};
+
+/* 01 Splash & Onboarding */
+SC.splash=()=>`<div class="splash sp" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+<div class="sp-glow"></div>
+<div class="sp-shield"><svg viewBox="0 0 160 192" width="80" height="96" aria-hidden="true"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8FB0FF"/><stop offset="1" stop-color="#2563EB"/></linearGradient></defs><path d="M70 6a28 28 0 0 1 20 0l46 17a24 24 0 0 1 16 22v78a24 24 0 0 1-10 19l-50 37a24 24 0 0 1-28 0L14 142A24 24 0 0 1 4 123V45a24 24 0 0 1 16-22z" fill="#fff"/><path class="sp-grad" d="M70 6a28 28 0 0 1 20 0l46 17a24 24 0 0 1 16 22v78a24 24 0 0 1-10 19l-50 37a24 24 0 0 1-28 0L14 142A24 24 0 0 1 4 123V45a24 24 0 0 1 16-22z" fill="url(#sg)"/><path class="sp-check" d="M52 100l18 18 40-40" fill="none" stroke="#0E1F5C" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<p class="logo sp-logo" style="color:#fff;font-size:52px;position:absolute">Vesper<span style="background:linear-gradient(135deg,#7FA2FF,#4361EE);-webkit-background-clip:text;background-clip:text;color:transparent">VPN</span></p></div>`;
+const FI={
+shield:'<path d="M12 2l8 3v7c0 4.6-3.4 8.6-8 10-4.6-1.4-8-5.4-8-10V5z" fill="currentColor"/><path d="M8.5 12l2.5 2.5 4.5-5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
+lock:'<path d="M8 10V7.5a4 4 0 0 1 8 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><rect x="4.5" y="10" width="15" height="11" rx="3" fill="currentColor"/><circle cx="12" cy="15.5" r="1.8" fill="#fff"/>',
+home:'<path d="M3 11 12 3l9 8v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" fill="currentColor"/><path d="M12 11l4 1.5v2.5c0 2-1.7 3.6-4 4.2-2.3-.6-4-2.2-4-4.2v-2.5z" fill="#fff"/>',
+anon:'<path d="M12 2l8 3v7c0 4.6-3.4 8.6-8 10-4.6-1.4-8-5.4-8-10V5z" fill="currentColor"/><circle cx="12" cy="10" r="2.3" fill="#fff"/><path d="M8 16.5c.6-1.8 2.2-3 4-3s3.4 1.2 4 3" fill="#fff"/>',
+game:'<path d="M7 7h10a5 5 0 0 1 5 5v1a4 4 0 0 1-7 2.6L14 15h-4l-1 .6A4 4 0 0 1 2 13v-1a5 5 0 0 1 5-5z" fill="currentColor"/><path d="M7 10v4M5 12h4" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><circle cx="15.5" cy="11" r="1.1" fill="#fff"/><circle cx="17.5" cy="13" r="1.1" fill="#fff"/>',
+cast:'<rect x="3" y="4" width="18" height="14" rx="3" fill="currentColor"/><path d="M6 15a3 3 0 0 1 3 3M6 12a6 6 0 0 1 6 6" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/><circle cx="6.5" cy="17.5" r="1" fill="#fff"/>'};
+const fi=n=>`<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" style="color:var(--blue);flex:none">${FI[n]}</svg>`;
+const OB=[
+ {img:'img/ob1.jpg',t:'Fast, Simple, and<br>Reliable',s:'Unleash the Speed. Secure Your Connection.',a:['shield','Reliable','tl'],b:['lock','Protected','br']},
+ {img:'img/ob2.jpg',t:'Private and<br>Anonymous',s:'Browse anonymously and confidently, knowing your data is safe.',a:['home','Secure','tr'],b:['anon','Anonymous','bl']},
+ {img:'img/ob3.jpg',t:'No Limits,<br>Anywhere',s:'Unrestricted Streaming, Gaming, and Browsing.',a:['game','Gaming','tr'],b:['cast','Streaming','bl']}];
+const obPill=([icon,label,pos])=>`<span class="obpill ${pos}">${fi(icon)}${label}</span>`;
+SC.onboard=()=>`${safeTop()}<div class="scr" style="display:flex;flex-direction:column;overflow:hidden">
+<div class="obview" id="obview" aria-roledescription="carousel" aria-label="Introduction"><div class="obtrack" id="obtrack" style="transform:translateX(-${(S.ob||0)*100}%)">
+${OB.map((o,i)=>`<section class="obslide" aria-roledescription="slide" aria-label="${i+1} of 3" ${i===(S.ob||0)?'':'aria-hidden="true"'}>
+<div class="obphoto"><img src="${o.img}" alt="" draggable="false">${obPill(o.a)}${obPill(o.b)}</div>
+<div class="col pad obtext"><h1 class="h1 c" style="font-size:30px;line-height:1.3">${o.t}</h1><p class="p c" style="font-size:17px;max-width:310px">${o.s}</p></div></section>`).join('')}
+</div></div>
+<div class="obdots" role="tablist" aria-label="Choose slide">${OB.map((_,i)=>`<button class="obdot ${i===(S.ob||0)?'on':''}" role="tab" aria-selected="${i===(S.ob||0)}" aria-label="Slide ${i+1}" data-act="obGo" data-arg="${i}"><i></i></button>`).join('')}</div>
+<div class="col pad" style="gap:18px;align-items:center;margin:auto 0 26px;padding-top:18px"><button class="btn btn-p" data-act="toSignup">Get Started</button><a class="small u" style="color:var(--mute);padding:8px" data-act="toSignin">Skip</a></div></div>`;
+
+/* 02 Create Account */
+SC.signup=()=>{const v=S.signVariant;return `${safeTop()}${v?backBack():''}<div class="scr"><div class="col pad" style="gap:14px;padding:${v?'50px':'20px'} 24px 30px">
+${logo()}<h1 class="h1" style="margin-top:${v?70:26}px">Create Account</h1>
+${v?'':`<button class="btn btn-o" data-act="google"><span class="gl">G</span>Continue with Google</button><div class="or">— or sign up with email —</div>`}
+${fld('Email or Phone','su-email',{ph:'email@example.com'})}
+${fld('Password','su-pw',{type:'password',ph:'Password',strength:v?0:4})}
+${fld('Confirm Password','su-pw2',{type:'password',ph:'Password'})}
+<div class="agree" data-act="agree" style="cursor:pointer;padding:6px 8px"><span class="chk ${S.agree?'on':''}" id="chk" style="margin-top:6px"></span><span style="font-size:15px">By signing up you agree to our Terms and Conditions Privacy Policy</span></div>
+<p class="errt" id="e-agree"></p>
+<button class="btn btn-p" data-act="signup">Create Account</button>
+<p class="small c" style="margin:6px 0;font-size:15px">Already have an account? <a class="lnk" data-act="${v?'toSigninBack':'toSignin'}">Sign In</a></p>
+${v?'':`<div style="position:relative"><button class="btn btn-o" data-act="ov" data-arg="guest" data-tour="guestbtn">${ic('alert')}Continue as Guest</button>
+</div>`}</div></div>`};
+
+/* 03 Sign In & Welcome */
+SC.signin=()=>{const v=S.signVariant;return `${safeTop()}${v?backBack():''}<div class="scr"><div class="col pad" style="gap:16px;padding:50px 24px 30px">
+${logo()}<h1 class="h1" style="margin-top:${v?80:18}px">${v?'Sign in to your account':'Sign in'}</h1>
+<div id="authErr"></div>
+${v?'':`<button class="btn btn-o" data-act="google"><span class="gl">G</span>Continue with Google</button><div class="or">or sign in with email</div>`}
+${fld('Email or Phone','si-email',{ph:'email@example.com'})}
+${fld('Password','si-pw',{type:'password',ph:'Password',right:'<a data-act="go" data-arg="forgot">Forgot Password?</a>'})}
+<button class="btn btn-p" id="siBtn" data-act="signin" ${v?'':'disabled'} style="margin-top:8px">Sign in</button>
+<p class="small c" style="margin:4px 0;font-size:15px">Don't have an account? <a class="lnk" data-act="${v?'toSignupBack':'toSignup'}">Sign Up</a></p>
+${v?'':`<button class="btn btn-o" data-act="ov" data-arg="guest">${ic('alert')}Continue as Guest</button>`}</div></div>`};
+
+/* 04 Email Verification & OTP */
+SC.verify=()=>`${safeTop()}${backBack()}<div class="scr">${logo('margin-top:40px')}<div class="col pad" style="gap:22px;margin-top:110px">
+<h1 class="h1">Email Verification</h1><p style="margin:0;font-size:15px;line-height:1.6;color:var(--blue-d)">We Sent a link in email for verification code to your email "${S.email}"</p>
+<button class="btn btn-p" data-act="go" data-arg="otp">Get the Code</button></div></div>`;
+SC.otp=()=>{const m=(S.otpFor==='reset'?S.resetEmail:S.email)||'';const masked=m.replace(/^(.)[^@]*/,'$1•••');return `${safeTop()}${backBack()}<div class="scr">${logo('margin-top:40px')}<div class="col pad" style="gap:12px;margin-top:110px">
+<h1 class="h1">Submit OTP</h1><p style="margin:0;font-size:15px;line-height:1.6">A 4-digit verification code was sent to your email<br>${masked}</p>
+<label class="lbl" style="margin-top:16px;font-weight:500">OTP</label>
+<div class="otp ${S.otpErr?'err':''}" id="otp" style="gap:24px">${[0,1,2,3].map(i=>`<input inputmode="numeric" maxlength="1" data-i="${i}" aria-label="Digit ${i+1}">`).join('')}</div>
+${S.otpErr?'<p class="errt">Enter your correct OTP</p>':''}
+<button class="btn btn-p" data-act="otp" style="margin-top:18px">Submit</button></div></div>`};
+
+/* 05 Forgot Password */
+SC.forgot=()=>`${safeTop()}${backBack()}<div class="scr">${logo('margin-top:40px')}<div class="col pad" style="gap:18px;margin-top:110px">
+<h1 class="h1">Forgot Password</h1><p class="p" style="font-size:17px">Enter your email or phone number to reset your password.</p>
+${fld('Email or Phone','fp-email',{ph:'email@example.com'})}
+<button class="btn btn-p" style="margin-top:6px" data-act="forgot">Send Reset Link</button></div></div>`;
+SC.checkEmail=()=>`${safeTop()}${backBack()}<div class="scr">${logo('margin-top:40px')}<div class="col pad" style="gap:16px;margin-top:60px;align-items:center">
+<div class="ib" style="width:80px;height:80px">${ic('mail','l')}</div><h1 class="h1 c" style="margin-top:22px">Check Your Email</h1>
+<p class="p c" style="font-size:16px;line-height:1.7">We've sent a verification code (OTP) to<br><b class="gt" style="font-size:17px">${S.resetEmail}</b><br>Please check your inbox and enter the code.</p>
+<button class="btn btn-p" style="margin-top:14px" data-act="go" data-arg="otp">Open Email App</button>
+<p class="small c" style="margin:20px 0 0">Didn't receive email? <a class="lnk" data-act="noop">Resend</a></p>
+<p class="small c" style="margin:110px 0 0" data-act="back">Wrong email? Go back to change it</p></div></div>`;
+SC.setPw=()=>`${safeTop()}<div class="scr">${logo('margin-top:90px')}<div class="col pad" style="gap:18px;margin-top:60px">
+<h1 class="h1">Set New Password</h1>
+<div class="inp lock">${ic('shield','','color:var(--ok)')}<span class="t">${S.resetEmail}</span>${ic('lock','s','color:var(--mute)')}</div>
+${fld('Set New Password','np-pw',{type:'password',ph:'Password'})}
+${fld('Confirm Password','np-pw2',{type:'password',ph:'Password'})}
+<button class="btn btn-p" style="margin-top:8px" data-act="setPw">Submit</button></div></div>`;
+
+/* 06-08 Home (Free / Guest / Premium) */
+SC.home=()=>{
+const v=S.vpn,prem=S.user==='premium',guest=S.user==='guest';
+const heroCls=v==='on'?'hero on':v==='fail'?'hero fail':v==='connecting'?'hero cn':'hero';
+const btn=v==='off'?`<button class="btn btn-p" data-act="connect" data-tour="connect">Connect</button>`:v==='connecting'?`<button class="btn btn-o" data-act="cancelConn">${ic('alert')}Cancel</button>`:v==='on'?`<button class="btn btn-o" data-act="disconnect" style="${isFree()?'background:var(--tint)':''}">${ic('alert')}Disconnect</button>`:`<button class="btn btn-p" data-act="connect">Retry</button>`;
+const STEPS=['Finding fastest server…','Securing connection…','Encrypting traffic…'];
+const el=S.connAt?Date.now()-S.connAt:0;
+const stat=v==='off'?`Current internet status ${ic('down','s')}`:v==='connecting'?`<span class="cstat"><span style="color:#7A4A00;font-weight:600">Connecting<span class="dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></span><small id="cstep">${STEPS[Math.min(2,Math.floor(el/600))]}</small></span>`:v==='on'?`<span id="timer">Connected · ${fmt(Date.now()-S.since)}</span> ${ic('down','s')}`:`<span style="color:var(--err)">Connection failed</span>`;
+const shown=S.loc||(v!=='off'||prem?{c:'au',n:'Australia',city:'Melbourne',fast:!prem}:null);
+const loc=shown?`${shown.fast&&v!=='on'?`<span class="fastp">${ic('bolt','s','color:#F59E0B;width:16px;height:16px')}Fastest</span>`:''}<span class="flag f-${shown.c}"></span><div class="nm" style="font-size:19px;letter-spacing:.02em">${shown.n}<br>${shown.city}</div>`
+ :`<span class="ib" style="width:44px;height:44px">${ic('bolt')}</span><div class="nm"><b style="font-weight:500;font-size:18px">Free Server</b><span style="font-size:14px;color:var(--ink2);letter-spacing:.03em">Auto-selected · Fastest available</span></div>`;
+const qcList=quick();
+const qc=qcList.length?`<div class="qc">${qcList.map((q,i)=>`<button class="qcc" data-act="qc" data-arg="${i}" aria-label="Connect to ${q.n}${q.b==='heart'?' (favorite)':' (recent)'}">${flag(q.c)}${q.b?`<span class="qb">${ic(q.b,'',`color:${q.b==='heart'?'#E0245E':'var(--mute)'};${q.b==='heart'?'fill:#E0245E':''}`)}</span>`:''}${q.n.length>13?q.n.slice(0,12)+'…':q.n}</button>`).join('')}</div>`:`<div class="empty">Your Quick Connect servers will appear here</div>`;
+const header=guest?`<div class="guest">${ic('info','s')}<a data-act="guestTip" data-tour="guest" style="color:var(--ink2);font-weight:500">Browsing as Guest</a> · <a data-act="toSignup" class="u">Sign Up</a></div>`:'';
+return `${header}
+<div class="${heroCls} ${guest?'g':''}">
+${setup()?(()=>{const s=setup(),d=setupDone(s);return `<button class="setupbtn" data-act="ov" data-arg="setup" aria-label="Getting started checklist, ${d} of ${SETUP.length} done">${ring(d,SETUP.length)}<span>${d}/${SETUP.length}</span></button>`})():''}
+${v==='on'&&isFree()?`<div class="datap"><span class="dot"></span><span id="dleft">${Math.max(0,Math.round(S.data))} MB left today</span><a data-act="upgrade">Upgrade</a></div>`:''}
+<div class="vis"><div class="ring r1"></div><div class="ring r2"></div><div class="pwwrap ${v}">${v==='connecting'?`<span class="sweep" aria-hidden="true"></span>`:''}${v==='connecting'||v==='on'?'<span class="wave"></span><span class="wave"></span><span class="wave"></span>':''}${v==='connecting'?`<span class="orbit o1" aria-hidden="true"><i></i></span><span class="orbit o2" aria-hidden="true"><i></i></span><span class="orbit o3" aria-hidden="true"><i></i></span><svg class="prog" viewBox="0 0 220 220" aria-hidden="true"><defs><linearGradient id="pg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7FA2FF"/><stop offset="1" stop-color="#2563EB"/></linearGradient></defs><circle class="prog-bg" cx="110" cy="110" r="100"/><circle class="prog-fg" cx="110" cy="110" r="100" style="animation-delay:-${el}ms"/></svg>`:''}${v==='on'?'<span class="burst" aria-hidden="true"></span>':''}<button class="pw" data-act="power" aria-label="${v==='on'?'Disconnect':v==='connecting'?'Cancel connecting':'Connect'}">${ic('power')}</button></div>
+<div class="stat" role="status" aria-live="polite">${stat}</div></div>
+<div class="card">${btn}
+<div class="loc" data-tour="loc" data-act="tab" data-arg="servers" role="button" tabindex="0" aria-label="Choose server location" style="cursor:pointer;border-radius:16px">${loc}${prem?`<span class="pill gold">${ic('crown','s','width:12px;height:12px')}PREMIUM</span>`:''}<button data-act="tab" data-arg="servers" aria-label="Change server" style="border:0;background:none;color:var(--faint);padding:4px;display:flex;margin-left:auto">${ic('refresh')}</button></div>
+${qcList.length?'':'<div class="hist">CONNECTION HISTORY</div>'}<div data-tour="qc" class="col" style="gap:12px;border-radius:16px"><b style="font-size:15px">Quick Connect</b>${qc}</div></div></div>
+${prem&&S.trialEnded?`<div class="row" style="position:absolute;left:14px;right:14px;top:max(16px,env(safe-area-inset-top));z-index:4;gap:10px;background:#141A2E;color:#fff;border-radius:16px;padding:12px 12px 12px 16px"><div class="col" style="flex:1;gap:2px"><b style="font-size:14px">Trial ended — payment in 24h</b><span style="font-size:13px;color:#A9B6D9">You'll be charged unless you cancel</span></div><a data-act="trialCancel" style="background:#3A4256;color:#fff;border-radius:10px;padding:9px 12px;font-size:14px;font-weight:600">Cancel</a><a data-act="trialPay" style="background:var(--grad);color:#fff;border-radius:10px;padding:9px 12px;font-size:14px;font-weight:600">Pay Now</a></div>`:''}
+
+
+
+${tabs('home')}`};
+SC.offline=()=>`${safeTop()}<div class="col pad" style="align-items:center;gap:16px;margin-top:180px">${ic('wifioff','','width:110px;height:110px;color:#B5B5B5;stroke-width:1')}<h1 class="h2 c" style="font-size:26px;margin-top:20px">No Internet Connection</h1><p class="p c" style="font-size:17px">Please check your network connection and try again.</p><button class="btn btn-p" style="margin-top:18px" data-act="retryNet">Retry</button></div>${tabs('home')}`;
+
+/* 09 Server List */
+const srvRows=()=>{const q=S.q.toLowerCase(),prem=S.user==='premium';
+const list=COUNTRIES.filter(c=>c[1].toLowerCase().includes(q));
+const row=c=>{const locked=!prem&&!c[3];const open=S.exp===c[0]&&!locked;const f=isFav(c[0]);
+if(locked)return `<div class="srow"><button class="srow-main" data-act="locked" data-arg="${c[0]}" aria-label="${c[1]}, premium only">${flag(c[0])}<span style="flex:1;color:var(--mute)">${c[1]}</span><span class="lockb"><span class="pro" style="color:var(--blue);background:var(--tint)">PRO</span>${ic('lock')}</span></button></div>`;
+return `<div class="srow"><button class="srow-main" data-act="exp" data-arg="${c[0]}" aria-expanded="${open}">${flag(c[0])}<span class="cname">${c[1]}<small>${c[2].length} location${c[2].length>1?'s':''}</small></span></button><button class="fav ${f?'on':''} ${S.favPop===c[0]?'pop':''}" data-act="fav" data-arg="${c[0]}" aria-pressed="${f}" aria-label="${f?'Remove '+c[1]+' from favorites':'Add '+c[1]+' to favorites'}">${ic('heart')}</button><button class="chevb" data-act="exp" data-arg="${c[0]}" aria-label="Show ${c[1]} cities" aria-expanded="${open}">${ic(open?'up':'down')}</button></div>
+${open?`<div class="cities" role="list">${c[2].map((ct,k)=>{const ms=latency(c[0],k),sel=S.loc&&S.loc.c===c[0]&&S.loc.city===ct;return `<button class="city ${sel?'sel':''}" role="listitem" data-act="pick" data-arg="${c[0]}|${ct}" aria-label="${ct}, ${c[1]}, ${ms} milliseconds${sel?', selected':''}"><span class="pin">${ic('pin','s')}</span><span class="cn"><b>${ct}</b><small>${c[0].toUpperCase()}-${String(k+1).padStart(2,'0')} · ${ms} ms</small></span>${bars(ms)}${sel?ic('check','s','color:var(--blue);stroke-width:2.6'):''}</button>`}).join('')}</div>`:''}`};
+const favs=list.filter(c=>isFav(c[0])&&(prem||c[3]));
+const favBlock=!S.search&&favs.length?`<p class="sec" style="padding:18px 0 4px">Favorites</p>`+favs.map(row).join('')+`<p class="sec" style="padding:22px 0 4px">All servers</p>`:'';
+if(prem||S.search)return favBlock+list.filter(c=>S.search||!isFav(c[0])).map(row).join('');
+return favBlock+list.filter(c=>c[3]&&!isFav(c[0])).map(row).join('')+`<p class="sec" style="padding:22px 0 4px">Premium countries</p>`+list.filter(c=>!c[3]).map(row).join('');};
+SC.servers=()=>{
+if(S.srvErr)return `${safeTop()}<div class="row pad" style="justify-content:space-between;padding-top:30px"><h1 class="h1">Server List</h1><span class="tile" style="border-radius:50%">${ic('search')}</span></div><div class="col pad" style="align-items:center;gap:16px;margin-top:150px"><div class="ib lg" style="background:#FDE4E4;color:var(--err);box-shadow:none">${ic('warn','xl')}</div><h2 class="h2 c" style="font-size:28px;margin-top:8px">Connection Check Failed</h2><p class="p c">Unable to verify server connection. Please check your internet connection and try again.</p><button class="btn btn-p" style="margin-top:10px" data-act="retrySrv">Retry</button></div>${tabs('servers')}`;
+if(S.search)return `${safeTop()}<div class="pad" style="padding-top:28px"><div class="inp" style="height:52px">${ic('search','','color:var(--mute)')}<input id="srch" placeholder="Search a server" value="${S.q}"></div></div><div class="scr"><div class="col pad" id="slist">${srvRows()}</div></div>`;
+return `${safeTop()}<div class="row pad" style="justify-content:space-between;padding-top:30px;padding-bottom:6px"><h1 class="h1">Server List</h1><button class="tile" style="border-radius:50%;border:0" data-act="openSearch" aria-label="Search">${ic('search')}</button></div>
+<div class="scr"><div class="col pad" style="padding-bottom:110px">
+${isFree()&&!S.srvLoading?`<div class="note" style="margin-top:8px">${ic('info')}<div><b>Why choose a server country?</b>Your server location affects speed, content access, and privacy. Choose nearby servers for speed, or specific countries to access region-locked content.</div></div>`:''}
+<div id="slist">${S.srvLoading?Array.from({length:10},(_,i)=>`<div class="srow sk"><span class="skel" style="width:36px;height:26px;border-radius:6px"></span><span class="skel" style="width:${120+(i*37)%80}px;height:16px"></span><span style="flex:1"></span><span class="skel" style="width:22px;height:22px"></span></div>`).join(''):srvRows()}</div></div></div>${tabs('servers')}`};
+
+/* 10 Choose Your Plan */
+SC.plans=()=>{const sel=S.planSel,p=sel&&planOf(sel);return `${safeTop()}${arrowLogo()}
+<div class="scr"><div class="col pad" style="gap:12px;margin-top:10px;padding-bottom:160px">
+<h1 class="h1" style="font-size:28px">Choose Your Plan</h1>
+<div class="chips" style="margin-bottom:8px"><span class="chip"><span style="width:16px;height:11px;border-radius:2px;background:linear-gradient(#fff 0 33%,#0039A6 33% 66%,#D52B1E 66%);box-shadow:0 0 0 .5px #ccc"></span>Russia-based</span><span class="chip">No-logs policy</span><span class="chip">Cancel anytime</span></div>
+${PLANS.map(x=>{const on=sel===x.id,cur=(x.id==='free'&&S.user!=='premium')||(S.user==='premium'&&S.plan===x.id);
+return `<button class="plan ${on?'sel':''}" data-act="plan" data-arg="${x.id}"><span class="rad"></span><div class="bd"><span class="nm">${x.nm}</span>${x.pr?`<span class="pr">${x.was?`<s style="font-size:14px;color:var(--faint);font-weight:500">${x.was}</s> <span class="gt">${x.pr}</span>`:x.pr}</span>`:''}${x.sub?`<span class="sub" style="${x.pr?'':'font-size:14px'}">${x.sub}</span>`:''}${x.trial?`<span class="sub row" style="color:#15803D;font-weight:500;gap:5px">${ic('gift','s','width:14px;height:14px;color:#15803D')}7-day free trial · then $3.33/mo</span>`:''}</div>${cur?'<span class="pill g">CURRENT PLAN</span>':x.badge?`<span class="pill b">${x.badge}</span>`:x.badge2?`<span class="pill o">${x.badge2}</span>`:''}${ic(on?'up':'down','s',`color:${on?'var(--blue)':'var(--mute)'}`)}${on?`<div class="feat">${x.f.map(t=>`<div>${ic('check')}${t}</div>`).join('')}</div>`:''}</button>`}).join('')}
+</div></div>
+<div class="foot"><button class="btn btn-p" data-act="planGo" ${p?'':'disabled'}>${p?p.cta:'Select a Plan'}</button><span class="small">${p?p.note:'Free forever · upgrade for full access'}</span></div>`};
+
+/* 11 Checkout & Payment */
+SC.checkout=()=>{const p=planOf(S.planSel)||PLANS[2];return `${safeTop()}${arrowLogo()}<div class="scr"><div class="col pad" style="gap:14px;margin-top:14px;padding-bottom:30px">
+<h1 class="h1">Checkout</h1>
+${fld('Full Name','co-name',{val:S.coName,lst:'font-weight:500;color:var(--ink2)'})}
+${fld('Email','co-email',{val:S.coEmail,lst:'font-weight:500;color:var(--ink2)'})}
+<div style="border:1px solid var(--line);border-radius:20px;padding:6px 20px;margin-top:6px">
+<div class="kv" style="padding:16px 0;border-bottom:1px solid var(--line);font-size:16px"><span style="color:var(--ink)">${p.nm}</span><b style="font-size:20px">${p.price}</b></div>
+<div class="kv" style="padding:16px 0"><b style="color:var(--ink);font-size:18px">Total Payable</b><b style="font-size:20px">${p.price}</b></div></div>
+<div class="row" style="gap:14px;margin-top:10px"><span class="radio on" style="margin-right:18px"></span><span class="pmlogo" style="color:#003087">P</span><span class="pmlogo" style="color:#1A1F71">VISA</span><span class="pmlogo" style="font-style:normal"><span style="width:18px;height:18px;border-radius:50%;background:#EB001B"></span><span style="width:18px;height:18px;border-radius:50%;background:#F79E1B;margin-left:-7px;opacity:.9"></span></span></div>
+<button class="btn btn-p" style="justify-content:space-between;padding:0 8px 0 24px;margin-top:22px" data-act="pay">Pay Now<span style="width:40px;height:40px;border-radius:50%;background:#fff;color:var(--blue);display:flex;align-items:center;justify-content:center">${ic('play','s')}</span></button>
+<div class="note" style="margin-top:60px">${ic('info')}<div><b>Secure payment &amp; refund policy</b>All payments are encrypted with 256-bit SSL. 30-day money-back guarantee — no questions asked. Cancel anytime from Settings.</div></div></div></div>`};
+SC.processing=()=>`${safeTop()}${arrowTitle('Checkout')}<div class="col pad" style="align-items:center;gap:14px;margin-top:220px"><div class="spinner">${Array.from({length:8},(_,i)=>`<i style="transform:rotate(${i*45}deg);opacity:${.3+i*.1}"></i>`).join('')}</div><h2 class="h2 c" style="font-size:20px;margin-top:10px">Processing Payment...</h2><p class="small c" style="margin:0">Please do not close this screen</p></div><div class="pad" style="position:absolute;left:0;right:0;bottom:34px"><button class="btn" disabled>Pay Now</button></div>`;
+SC.payfail=()=>`${safeTop()}${arrowTitle('Checkout')}<div class="col pad" style="align-items:center;gap:14px;margin-top:150px"><div class="ib lg" style="width:120px;height:120px;background:#B91C1C;box-shadow:none">${ic('x','xl','stroke-width:2.2')}</div><h2 class="h2 c" style="font-size:26px;margin-top:14px">Payment Failed</h2><p class="p c">Your payment could not be processed. Please check your card details and try again.</p></div>
+<div class="col pad" style="position:absolute;left:0;right:0;bottom:34px;gap:22px;align-items:center"><button class="btn btn-p" data-act="back">Try Again</button><p class="small c" style="margin:0">Need help? <a class="lnk" data-act="go" data-arg="support">Contact Support</a></p></div>`;
+SC.welcome=()=>{const p=planOf(S.plan)||PLANS[5];return `<div style="position:absolute;left:0;right:0;top:0;height:470px;background:var(--grad)"></div>${safeTop()}
+<div class="col" style="align-items:center;gap:16px;position:relative;color:#fff;margin-top:40px"><p style="margin:0;font-size:20px;font-weight:600">VesperVPN</p>
+<div style="width:110px;height:110px;border-radius:28px;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--blue);margin-top:10px">${ic('shield','xl')}</div>
+<h1 class="h1 c" style="margin-top:6px">Welcome to Premium</h1><span class="row" style="gap:8px;font-size:17px">${ic('crown','s')}${p.nm} · All Features Unlocked</span></div>
+<div class="col" style="position:absolute;left:0;right:0;top:420px;bottom:0;background:#fff;border-radius:40px 40px 0 0;padding:34px 24px 30px;gap:20px"><p class="sec">Unlocked benefits</p>
+<div class="ben" style="gap:24px">${['Unlimited data – no daily cap','All 50+ countries – no restrictions','5 simultaneous devices','Full streaming (Netflix, Spotify, etc.)','Cancel anytime'].map(t=>`<div style="font-size:15px"><span class="ck" style="background:var(--grad);color:#fff">${ic('check')}</span>${t}</div>`).join('')}</div>
+<button class="btn btn-p" style="margin-top:auto" data-act="startPremium">Start Using VesperVPN</button></div>`};
+SC.receipt=()=>{const p=planOf(S.plan)||PLANS[2];return `${safeTop()}${arrowTitle('Receipt')}<div class="scr"><div class="col pad" style="align-items:center;gap:14px;margin-top:40px;padding-bottom:110px">
+<div class="ib" style="width:72px;height:72px">${ic('check','l')}</div><h2 class="h2 c" style="font-size:26px;margin-top:10px">Payment Successful</h2>
+<div style="width:100%;border:1px solid var(--line);border-radius:22px;padding:18px 24px;margin-top:20px;box-shadow:0 12px 24px -18px rgba(15,23,42,.35)">
+<div class="kv"><span>Order ID</span><b>#VSP-20260108</b></div><div class="kv"><span>Date</span><b>08 Jan 2026</b></div><div class="kv"><span>Plan</span><b>${p.nm} Premium</b></div><div class="kv"><span>Amount</span><b>${p.price}</b></div>
+<div class="kv" style="border-bottom:1px solid var(--line);padding-bottom:16px"><span>Payment method</span><b>Visa ••••4242</b></div>
+<div class="kv" style="padding-top:16px"><b style="font-size:17px">Total Paid</b><b style="font-size:24px">${p.price}</b></div></div>
+<button class="btn btn-o" style="margin-top:6px" data-act="noop">Download PDF</button>
+<button class="btn btn-p" data-act="tab" data-arg="home">Back to Home</button></div></div>${tabs('menu')}`};
+
+/* 12 Menu */
+const mrow=(icn,tone,t,sub,act,arg,o={})=>`<a class="mrow" data-act="${act}" data-arg="${arg||''}"><span class="mtile ${tone}">${ic(icn)}</span><span class="mtx"><span class="mt" style="${o.tst||''}">${t}</span>${sub?`<span class="ms">${sub}</span>`:''}</span>${o.lock?`<span class="mlock">${ic('lock','s')}PRO</span>`:''}${o.noChev?'':ic('right','s','color:var(--faint)')}</a>`;
+SC.menu=()=>{const u=S.user||'guest',p=planOf(S.plan)||PLANS[5],locked=u!=='premium';
+const notifOn=Object.values(S.notif).filter(Boolean).length;
+const head=u==='guest'?`<div class="mhead"><div class="row" style="gap:14px"><span class="mtile" style="width:52px;height:52px;border-radius:16px">${ic('user','l')}</span><div class="col" style="gap:4px;flex:1"><b style="font-size:19px">Sign in to your account</b><span class="small">Access all premium servers, faster speed and more protocols.</span></div></div><div class="row" style="gap:12px;margin-top:16px"><button class="btn btn-p btn-sm" data-act="toSignin">Sign In</button><button class="btn btn-o btn-sm" data-act="toSignup">Sign Up</button></div></div>`
+:u==='free'?`<div class="mhead"><a class="row" style="gap:14px;color:inherit" data-act="go" data-arg="account" aria-label="Open account"><span class="ib" style="width:56px;height:56px;font-size:24px;font-weight:600;box-shadow:none">${S.name[0]}</span><div class="col" style="gap:6px;flex:1;min-width:0"><b style="font-size:17px;overflow:hidden;text-overflow:ellipsis">${S.email}</b><span class="pill b" style="align-self:flex-start;height:24px">FREE PLAN – 1 GB/DAY</span></div>${ic('right','s','color:var(--faint)')}</a><button class="btn btn-p" style="margin-top:16px" data-act="go" data-arg="plans">${ic('crown','s')}Upgrade to Premium</button></div>`
+:`<div class="mhead prem"><a class="row" style="gap:14px;color:#fff" data-act="go" data-arg="account" aria-label="Open account"><span style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#FBBF24,#D97706);display:flex;align-items:center;justify-content:center;color:#fff;flex:none">${ic('crown')}</span><div class="col" style="gap:4px;flex:1;min-width:0"><b style="font-size:17px;overflow:hidden;text-overflow:ellipsis">${S.email}</b><span style="font-size:14px;color:#C9D6FF">${p.nm} Subscription</span></div>${ic('right','s','color:#C9D6FF')}</a><div class="row" style="justify-content:space-between;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.18)"><span style="font-size:14px;color:#C9D6FF">Expires on: <b style="color:#fff">12 March 2026</b></span><a data-act="go" data-arg="plans" style="background:#fff;color:var(--blue-d);border-radius:999px;padding:10px 18px;font-size:14px;font-weight:700">Expand Plan</a></div></div>`;
+return `${safeTop()}<div class="scr" style="background:#F5F7FB"><div class="col pad" style="padding-top:26px;padding-bottom:120px"><h1 class="h1" style="font-size:34px;margin-bottom:20px">Menu</h1>${head}
+<p class="mlabel">VPN Settings</p><div class="mcard">
+${mrow('shield','','Protocols',S.proto==='oc'?'Openconnect':'WireGuard',locked?'locked':'go','protocol',{lock:locked})}
+${mrow('sliders','violet','Connection Settings','Kill switch, auto-connect, DNS',locked?'locked':'go','settings',{lock:locked})}
+${mrow('bell','amber','Notification Settings',`${notifOn} alerts on`,'go','notifications')}
+${u!=='guest'?mrow('crown','green','My Subscription',u==='premium'?`${p.nm} · ${S.cancelled?'Cancelled':'Active'}`:'Free plan · 1 GB/day','go','subscription'):''}</div>
+<p class="mlabel">About us</p><div class="mcard">
+${mrow('doc','slate','About us','Version 1.2.0','go','about')}
+${mrow('headset','','Support center','FAQ, live chat &amp; email','go','support')}
+${mrow('lock','slate','Terms and Privacy Policy','Last update: 12 June 2026','go','terms')}</div>
+${u!=='guest'?`<div class="mcard" style="margin-top:20px">${mrow('logout','rose','Sign Out','','ov','signout',{noChev:1,tst:'color:var(--err)'})}</div>`:''}</div></div>${tabs('menu')}`};
+
+/* 13 Account & Password */
+const avatar=(sz)=>`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-size:${sz*.4}px;font-weight:600;flex:none">${S.name[0]}</div>`;
+SC.account=()=>`${safeTop()}${backTitle('Account')}<div class="scr"><div class="col pad" style="align-items:center;gap:6px;padding-bottom:110px">
+${avatar(124)}
+<div class="row" style="gap:8px;margin-top:14px"><b style="font-size:24px">${(S.email||'demouser').split('@')[0]}</b><a data-act="go" data-arg="editProfile" aria-label="Edit profile" style="color:var(--mute)">${ic('pencil','s')}</a></div><span class="small" style="font-size:15px">${S.email}</span>
+<div class="list" style="width:100%;margin-top:20px">${[['Full Name',S.name],['Email',S.email],['Phone Number',S.phone]].map(([k,v])=>`<div class="li" style="flex-direction:column;align-items:flex-start;gap:4px;padding:18px 24px"><span class="small" style="font-size:14px">${k}</span><b style="font-size:19px;font-weight:500">${v}</b></div>`).join('')}</div>
+<div class="list" style="width:100%;margin-top:14px"><a class="li" data-act="go" data-arg="changePw" style="padding:20px 24px"><span class="tx"><span class="tt" style="color:var(--blue);font-size:19px">Change Password</span></span>${ic('right','','color:var(--blue)')}</a><a class="li" data-act="ov" data-arg="delete" style="padding:20px 24px"><span class="tx"><span class="tt" style="color:var(--blue);font-size:19px">Delete Account</span></span>${ic('right','','color:var(--blue)')}</a></div></div></div>${tabs('menu')}`;
+SC.editProfile=()=>`${safeTop()}${arrowTitle('Edit Profile')}<div class="scr"><div class="col pad" style="gap:22px;margin-top:22px;padding-bottom:30px">
+<div style="align-self:center;position:relative">${avatar(100)}<button data-act="noop" aria-label="Change photo" style="position:absolute;right:-4px;bottom:-4px;width:32px;height:32px;border-radius:50%;background:#fff;border:0;color:var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(15,23,42,.2)">${ic('camera','s')}</button></div>
+${fld('Full Name','ep-name',{val:S.name,cls:'fl',lst:'color:var(--mute)'})}${fld('Email','ep-email',{val:S.email,cls:'ro',ro:1,lst:'color:var(--mute)'})}${fld('Phone Number','ep-phone',{val:S.phone,cls:'fl',lst:'color:var(--mute)'})}
+</div></div><div class="pad" style="padding-bottom:28px"><button class="btn btn-p" data-act="saveProfile">Save Changes</button></div>`;
+SC.changePw=()=>`${safeTop()}${backTitle('Change Password')}<div class="scr"><div class="col pad" style="gap:18px;margin-top:14px;padding-bottom:200px">
+${fld('Current Password','cp-cur',{type:'password',ph:'Password',greyErr:1})}
+${fld('New Password','cp-new',{type:'password',ph:'Password',help:'Minimum 8 characters',greyErr:1})}
+${fld('Confirm New Password','cp-new2',{type:'password',ph:'Password',greyErr:1})}
+</div></div><div class="pad" style="position:absolute;left:0;right:0;bottom:104px"><button class="btn btn-p" data-act="changePw">Update Password</button></div>${tabs('menu')}`;
+SC.pwUpdated=()=>`${safeTop()}<div class="col pad" style="align-items:center;gap:16px;margin-top:160px"><div class="ib xl ok" style="width:80px;height:80px">${ic('check','l','stroke-width:2.4')}</div><h1 class="h1 c" style="margin-top:24px">Password Updated!</h1><p class="p c" style="font-size:17px;line-height:1.7">Your password has been changed successfully. Please use your new password next time you sign in.</p></div><div class="pad" style="position:absolute;left:0;right:0;bottom:104px"><button class="btn btn-p" data-act="toAccount">Back to Account</button></div>${tabs('menu')}`;
+SC.deleted=()=>`${safeTop()}<div class="col pad" style="align-items:center;gap:16px;margin-top:240px"><div class="ib" style="width:120px;height:120px;box-shadow:none">${ic('check','xl','stroke-width:2')}</div><h1 class="h1 c" style="margin-top:28px">Account Deleted</h1><p class="p c" style="font-size:17px;line-height:1.7">Your account has been successfully deleted.<br>Thank you for using our service.</p></div><div class="pad" style="position:absolute;left:0;right:0;bottom:40px"><button class="btn btn-p" data-act="toSignin">Back to Login</button></div>`;
+
+/* 14 My Subscription */
+const benList=items=>`<div class="ben" style="gap:40px;padding-left:12px">${items.map(t=>`<div style="font-size:17px;gap:28px"><span class="ck" style="width:26px;height:26px">${ic('check')}</span>${t}</div>`).join('')}</div>`;
+SC.subscription=()=>{const prem=S.user==='premium',p=planOf(S.plan)||PLANS[5];
+const card=prem?`<div class="premcard" style="padding:28px 24px 22px"><div class="row" style="justify-content:space-between"><span class="row" style="gap:14px;font-size:30px;font-weight:700">${ic('crown')}${p.nm} Plan</span><span class="pill" style="${S.cancelled?'background:#6B7280;color:#fff':'background:var(--grad);color:#fff'}">${S.cancelled?'CANCELLED':'ACTIVE'}</span></div><span style="font-size:15px;color:#E3E9FB;padding-bottom:16px">Expires on: 12 March 2026</span><div class="stats"><div><b>50+</b><span>Countries</span></div><div><b>5</b><span>Devices</span></div><div><b>∞</b><span>Data</span></div></div></div>`
+:`<div class="premcard" style="padding:28px 24px 22px"><div class="row" style="justify-content:space-between"><span class="row" style="gap:14px;font-size:30px;font-weight:700">${ic('crown','','color:#9CA3AF')}Free Plan</span><span class="pill" style="background:var(--grad);color:#fff">ACTIVE</span></div><span style="font-size:15px;color:#E3E9FB;padding-bottom:16px">No expiration date</span><div class="stats"><div><b>5</b><span>Countries</span></div><div><b>1</b><span>Device</span></div><div><b>Limited</b><span>Data</span></div></div></div>`;
+const tx=prem?`<p class="sec" style="margin-top:10px">Transaction history</p><div class="col">${[['$0.00','12 Mar 2025','receipt',1],[S.cancelled?'$35.99':'$39.99','12 Mar 2024','card'],[S.cancelled?'$35.99':'$39.99','12 Mar 2023','card']].map(([a,d,i,fr],k)=>`<a data-act="go" data-arg="receipt" class="row" style="gap:18px;padding:16px 20px;border-bottom:${k<2?'1px solid var(--line)':'0'};color:var(--ink)"><span class="tile t" style="border-radius:50%;width:52px;height:52px">${ic(i)}</span><div class="col" style="flex:1;gap:4px"><b style="font-size:17px;font-weight:600">1 Year Plan</b><span class="small" style="font-size:16px">${d}</span></div><div class="col" style="align-items:flex-end;gap:6px"><b>${a}</b>${fr?'<span class="pill ok" style="height:26px">FREE</span>':''}</div></a>`).join('')}</div>`:'';
+return `${safeTop()}${backTitle('My Subscription')}<div class="scr"><div class="col pad" style="gap:28px;margin-top:10px;padding-bottom:110px">${card}
+${S.cancelled?`<div class="row" style="gap:20px;background:var(--grad);color:#fff;border-radius:22px;padding:22px 28px;font-size:14px;line-height:1.6">${ic('warn')}Your subscription has been cancelled. You still have access until 12 March 2026.</div>`:''}
+<p class="sec">Benefits</p>
+${prem?benList(['Unlimited high-speed data','All 50+ global locations','5 simultaneous devices','Full streaming &amp; gaming support']):benList(['1 GB data per day','5 server locations','1 device only','No streaming &amp; gaming support'])}
+${prem?(S.cancelled?`<button class="btn btn-p" style="margin-top:14px" data-act="reactivate">Reactivate Subscription</button>`:`<button class="btn btn-p" style="margin-top:14px" data-act="go" data-arg="plans">Upgrade Plan</button><a class="small c u" style="color:var(--ink2);font-size:15px;margin-top:-6px" data-act="go" data-arg="cancelReason">Cancel Subscription</a>`):`<button class="btn btn-p" style="margin-top:60px" data-act="go" data-arg="plans">Upgrade Plan</button>`}
+${tx}</div></div>${tabs('menu')}`};
+const REASONS=['Too expensive','Not using it enough','Found a better alternative','Technical issues / App problems','Missing features I need','Privacy concerns','Other reason'];
+SC.cancelReason=()=>`${safeTop()}${backTitle('Cancel Subscription')}<div class="scr"><div class="col pad" style="gap:22px;margin-top:6px;padding-bottom:110px">
+<p class="p" style="font-size:18px;color:var(--ink2)">We'd love to know why you're leaving</p>
+<div style="background:#F4F4F5;border:1px solid var(--line);border-radius:28px;padding:10px 20px">${REASONS.map((r,i)=>`<button class="reason" data-act="reason" data-arg="${i}">${r}<span class="radio ${S.reason===i?'on':''}"></span></button>`).join('')}</div>
+<div class="inp" style="height:100px;align-items:flex-start;padding-top:16px;border-color:var(--line);border-width:1px;border-radius:24px"><textarea placeholder="Tell us more (optional)" style="height:70px;resize:none;font-size:14px"></textarea></div>
+<button class="btn btn-p" style="margin-top:22px" data-act="keepSub">Keep My Subscription</button><button class="btn btn-o" data-act="go" data-arg="cancelSure">Continue</button></div></div>${tabs('menu')}`;
+SC.cancelSure=()=>`${safeTop()}${backTitle('Cancel Subscription')}<div class="scr"><div class="col pad" style="gap:16px;margin-top:14px;align-items:center;padding-bottom:110px">
+<div class="ib" style="width:84px;height:84px;box-shadow:none">${ic('warn','l')}</div><h1 class="h1 c" style="font-size:34px">Are you sure?</h1><p class="p c" style="font-size:17px;color:var(--ink2)">You will lose access to all Premium features on 12 March 2026</p>
+<div style="width:100%;background:#F4F4F5;border:1px solid var(--line);border-radius:28px;padding:24px 20px;margin-top:20px" class="col"><p class="sec" style="margin-bottom:18px">Features you will lose</p><div class="ben" style="gap:22px">${['Unlimited high-speed data','All 50+ global locations','5 simultaneous devices','Full streaming &amp; gaming support'].map(t=>`<div style="font-size:17px"><span class="ck no" style="width:22px;height:22px">${ic('x')}</span>${t}</div>`).join('')}</div></div>
+<button class="btn btn-p" style="margin-top:40px" data-act="keepSub">Keep My Subscription</button><button class="btn btn-o" data-act="doCancel">Yes, Cancel Subscription</button></div></div>${tabs('menu')}`;
+
+/* 15 VPN Settings */
+const INFO={kill:['Kill Switch','Automatically blocks all internet traffic if the VPN connection drops, preventing data leaks. Recommended to keep enabled for maximum security.'],split:['Split Tunneling','Choose which apps use the VPN and which connect directly. Useful for banking apps or local services that block VPN traffic.'],dns:['DNS Settings','Controls how your device resolves domain names. VesperVPN uses private DNS by default to prevent DNS leaks. Change only if you need a custom resolver.']};
+SC.settings=()=>`${safeTop()}${arrowTitle('VPN Settings')}<div class="scr"><div class="col" style="gap:24px;margin-top:20px;padding:0 16px 110px"><div class="list" style="border-radius:28px">
+<div class="li" data-act="info" data-arg="kill" style="padding:20px 18px 20px 20px"><span class="tile">${ic('shield')}</span><span class="tx"><span class="tt" style="font-size:19px;font-weight:500">Kill Switch</span><span class="st" style="font-size:15px">Cut internet if VPN drops</span></span>${toggle(S.set.kill,'set','kill','Kill Switch')}</div>
+<a class="li" data-act="go" data-arg="split" style="padding:20px 18px 20px 20px"><span class="tile">${ic('xc')}</span><span class="tx"><span class="tt" style="font-size:19px;font-weight:500">Split Tunneling</span><span class="st" style="font-size:15px">Choose apps that bypass VPN</span></span>${ic('right','chev')}</a>
+<div class="li" style="padding:20px 18px 20px 20px"><span class="tile">${ic('torch')}</span><span class="tx"><span class="tt" style="font-size:19px;font-weight:500">Auto-connect</span></span>${toggle(S.set.auto,'set','auto','Auto-connect')}</div>
+<a class="li" data-act="info" data-arg="dns" style="padding:20px 18px 20px 20px"><span class="tile">${ic('monitor')}</span><span class="tx"><span class="tt" style="font-size:19px;font-weight:500">DNS Settings</span></span><span class="st" style="color:var(--mute);font-size:15px;margin-right:18px">Default</span>${ic('right','chev')}</a></div>
+${S.info?`<div class="note" style="margin:0 20px;padding:18px 20px">${ic('info')}<div><b>${INFO[S.info][0]}</b>${INFO[S.info][1]}</div></div>`:''}</div></div>${tabs('menu')}`;
+const APPS=[['Chrome','#4285F4'],['Instagram','#E1306C'],['YouTube','#FF0000'],['Spotify','#1DB954'],['WhatsApp','#25D366'],['Netflix','#E50914']];
+SC.split=()=>`${safeTop()}${arrowTitle('Split Tunneling')}<div class="scr"><div class="col" style="gap:22px;margin-top:22px;padding:0 20px 110px"><p class="p" style="font-size:17px">Apps below will bypass the VPN tunnel</p>
+<div class="inp" style="background:var(--soft);border-color:transparent;height:52px;border-radius:16px">${ic('search')}<input id="appq" placeholder="Search apps..."></div>
+<div class="list" id="apps" style="border-radius:28px">${APPS.map(([n,c])=>`<div class="li" data-app="${n}" style="padding:16px 18px 16px 16px"><span style="width:40px;height:40px;border-radius:50%;background:${c};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">${n[0]}</span><span class="tx"><span class="tt" style="font-size:19px;font-weight:500">${n}</span></span>${toggle(S.split[n],'split',n)}</div>`).join('')}</div></div></div>${tabs('menu')}`;
+const NOTIF=[['VPN alerts',[['vpnd','VPN Disconnected','Notify when your secure connection drops','shieldoff'],['cfail','Connection Failed','Alerts for server connection issues','alert'],['auto','Auto-connect Triggered','Notify when VPN starts automatically','bolt']]],['Subscription',[['trial','Trial Expiring Soon','Reminders for trial end dates','cal'],['pay','Payment Reminder','Notification for upcoming renewals','card'],['offer','New Offer Available','Exclusive discounts and promotions','tag']]],['General',[['upd','App Updates','Get notified about new features','refresh'],['tips','Tips &amp; Tricks','How to get the most out of VesperVPN','info']]]];
+SC.notifications=()=>`${safeTop()}${arrowTitle('Notifications')}<div class="scr"><div class="col" style="padding:0 16px 110px">${NOTIF.map(([h,items])=>`<p class="sec" style="margin:34px 0 10px 18px">${h}</p>${items.map(([k,t,s,i])=>`<div class="row" style="gap:16px;padding:18px 16px;border-bottom:1px solid var(--line)"><span class="tile b" style="width:40px;height:40px;border-radius:12px;box-shadow:none">${ic(i)}</span><div class="col" style="flex:1;gap:4px"><b style="font-size:18px;font-weight:500">${t}</b><span class="small" style="font-size:14px">${s}</span></div>${toggle(S.notif[k],'notif',k,t.replace('&amp;','&'))}</div>`).join('')}`).join('')}</div></div>${tabs('menu')}`;
+const PROTO={oc:['Openconnect','Faster, suitable for streaming and daily browsing. Recommended for general users.'],wg:['WireGuard','WireGuard is fastest for most users.']};
+SC.protocol=()=>`${safeTop()}${backTitle('Security Protocol')}<div class="scr"><div class="col pad" style="gap:22px;margin-top:6px;padding-bottom:110px">
+<div class="note" style="padding:18px 20px">${ic('info')}<div><b>Which protocol should I choose?</b>WireGuard is fastest for most users. OpenVPN offers broader compatibility. IKEv2 is ideal for mobile with seamless reconnection.</div></div>
+<p class="p" style="font-size:15px;line-height:1.8">The protocol governs how your connection is secured. Leave it at default if unsure.</p>
+<div class="col">${Object.keys(PROTO).map((k,i)=>`<div class="row" style="gap:12px;padding:20px 0;${i?'':'border-bottom:1px solid var(--line)'}"><span data-act="proto" data-arg="${k}" style="font-size:20px;cursor:pointer">${PROTO[k][0]}</span>${k==='oc'?'<span style="background:var(--grad);color:#fff;border-radius:4px;padding:3px 10px;font-size:14px;font-weight:600">Recommended</span>':''}<span style="flex:1"></span><button class="radio ${S.proto===k?'on':''}" style="border-color:var(--blue);cursor:pointer;margin-right:16px" data-act="proto" data-arg="${k}" aria-label="${PROTO[k][0]}"></button><button style="width:28px;height:28px;border-radius:50%;font-size:14px;font-weight:700;border:1px solid var(--line);background:#fff;color:var(--ink2)" data-act="protoHelp" data-arg="${k}" aria-label="About ${PROTO[k][0]}">?</button></div>`).join('')}</div>
+${S.protoHelp?`<div class="col" style="gap:14px;border:1px solid var(--line);border-radius:22px;padding:24px"><div class="row" style="justify-content:space-between"><b style="font-size:20px;font-weight:600">${PROTO[S.protoHelp][0]}</b><button data-act="protoHelp" data-arg="" style="border:0;background:none;color:var(--mute);padding:0" aria-label="Close">${ic('xc')}</button></div><p class="p" style="line-height:1.8">${PROTO[S.protoHelp][1]}</p></div>`:''}</div></div>${tabs('menu')}`;
+
+/* 16 About, Support & System */
+SC.about=()=>`${safeTop()}${backTitle('About us')}<div class="scr"><div class="col pad" style="gap:22px;margin-top:10px;padding-bottom:110px">
+<div style="position:relative;height:180px;border-radius:36px;overflow:hidden;background:radial-gradient(120% 140% at 120% -20%,#A7C7F2 0%,#BFD3F2 30%,transparent 31%),radial-gradient(160% 180% at 110% -10%,#C9DAF6 0%,#D3E0F7 45%,transparent 46%),linear-gradient(90deg,#E2E7FB,#D9E3F8);display:flex;align-items:center;padding:0 22px">${logo('font-size:46px;text-align:left;position:relative')}</div>
+<h1 class="h1" style="margin-top:10px">The VPN You Deserve</h1><p style="margin:0;font-size:17px" data-act="go" data-arg="update">Current app version: 1.2.0</p>
+<p style="margin:0;font-size:17px;line-height:1.75">Vesper VPN collects personal information that you provide to us directly through the Site. We require that you provide personal information, such as an email address and payment information.</p></div></div>${tabs('menu')}`;
+const FAQ=[['What is a VPN and why do I need one?','A VPN encrypts your internet connection so your data is more secure from hackers. It\'s ideal for protecting your privacy when using public Wi-Fi.'],['What is a Security Protocol?','The protocol governs how your connection is secured. Leave it at default if unsure.'],['Why is my connection slow?','Pick a server close to you, or switch protocol in Menu › Protocols. WireGuard is usually the fastest.'],['How do I cancel my subscription?','Go to Menu › My Subscription › Cancel Subscription. You keep access until the end of your billing period.']];
+const acc=(title,body,open,cls='')=>`<details class="acc2 ${cls}" ${open?'open':''}><summary><span>${title}</span>${ic('down','s')}</summary><div class="acc2-b">${body}</div></details>`;
+SC.support=()=>`${safeTop()}${backTitle('Support center')}<div class="scr" style="background:#F5F7FB"><div class="col pad" style="gap:10px;padding-bottom:120px">
+<h2 class="h2" style="font-size:26px;margin-top:8px">Get Support</h2><p class="p" style="font-size:16px;color:var(--ink2)">Connecting with us is easy. Our dedicated team is ready to assist you promptly and efficiently.</p>
+<p class="mlabel">Contact us</p><div class="mcard">
+${mrow('mail','','Email Support','support@vespervpn.com','go','emailSupport')}
+${mrow('chat','green','Live Chat','<span class="online"></span>Available 24/7','go','chat')}
+${mrow('phone','violet','Sales','Contact our team','go','sales')}</div>
+<p class="mlabel">Frequently asked questions</p><div class="mcard accs">${FAQ.map(([q,a],i)=>acc(q,a,i===0)).join('')}</div></div></div>${tabs('menu')}`;
+
+const TOPICS=['Connection','Billing','Account','Other'];
+SC.emailSupport=()=>S.sentEmail?`${safeTop()}${arrowTitle('Email Support')}<div class="col pad" style="align-items:center;gap:14px;margin-top:120px"><div class="ib xl ok" style="width:88px;height:88px">${ic('check','l','stroke-width:2.4')}</div><h2 class="h2 c" style="margin-top:14px">Message sent</h2><p class="p c">We'll reply to <b style="color:var(--ink)">${S.sentEmail}</b> within 24 hours.<br>Ticket ID: #VSP-T-${String(S.ticket).padStart(5,'0')}</p><button class="btn btn-p" style="margin-top:20px" data-act="supportDone">Back to Support center</button></div>`
+:`${safeTop()}${arrowTitle('Email Support')}<div class="scr"><div class="col pad" style="gap:18px;margin-top:10px;padding-bottom:40px">
+<div class="note">${ic('clock')}<div><b>We usually reply within 24 hours</b>Messages go to support@vespervpn.com.</div></div>
+${fld('Your email','es-email',{ph:'email@example.com',val:S.email||''})}
+<div class="field"><span class="lbl">Topic</span><div class="chips" role="radiogroup" aria-label="Topic">${TOPICS.map(x=>`<button class="chip chipb ${S.topic===x?'on':''}" role="radio" aria-checked="${S.topic===x}" data-act="topic" data-arg="${x}">${x}</button>`).join('')}</div><p class="errt" id="e-topic"></p></div>
+<div class="field"><label class="lbl" for="es-msg">Message</label><div class="inp" id="w-es-msg" style="height:150px;align-items:flex-start;padding-top:14px"><textarea id="es-msg" placeholder="Describe your issue…" style="height:120px;resize:none"></textarea></div><p class="errt" id="e-es-msg"></p></div>
+<button class="btn btn-p" data-act="sendEmail">${ic('send','s')}Send Message</button>
+<p class="small c" style="margin:0">Or write to us directly at <a class="lnk" href="mailto:support@vespervpn.com">support@vespervpn.com</a></p></div></div>`;
+
+const CHAT_QUICK=["I can't connect","Billing question","Change my plan","Something else"];
+SC.chat=()=>`${safeTop()}<div class="row" style="gap:12px;padding:10px 16px 12px;border-bottom:1px solid var(--line)"><a data-act="back" aria-label="Back" style="color:var(--ink);width:44px;height:44px;display:flex;align-items:center">${ic('arrow')}</a><span class="ib" style="width:42px;height:42px;font-weight:700;box-shadow:none">M</span><div class="col" style="gap:2px;flex:1"><b style="font-size:16px">Maya · VesperVPN Support</b><span class="small row" style="gap:6px"><span class="online"></span>Online · replies in about 1 min</span></div></div>
+<div class="scr" id="chatScroll" style="background:#F5F7FB"><div class="col" style="gap:10px;padding:18px 16px 20px" role="log" aria-live="polite">
+<p class="small c" style="margin:0 0 6px">Today</p>
+${S.chat.map(m=>`<div class="bubble ${m.me?'me':''}">${m.t}</div>`).join('')}
+${S.chatTyping?`<div class="bubble typing" aria-label="Agent is typing"><i></i><i></i><i></i></div>`:''}
+${S.chat.length<=1&&!S.chatTyping?`<div class="chips" style="margin-top:6px">${CHAT_QUICK.map(q=>`<button class="chip chipb" data-act="chatQuick" data-arg="${q}">${q}</button>`).join('')}</div>`:''}
+</div></div>
+<div class="row chatbar"><div class="inp" style="flex:1;height:48px;border-radius:999px"><input id="chatIn" placeholder="Type a message…" aria-label="Message"></div><button class="sendb" data-act="chatSend" aria-label="Send message">${ic('send')}</button></div>`;
+
+const SIZES=['1–10','11–50','51–200','200+'];
+SC.sales=()=>S.salesSent?`${safeTop()}${arrowTitle('Contact Sales')}<div class="col pad" style="align-items:center;gap:14px;margin-top:120px"><div class="ib xl ok" style="width:88px;height:88px">${ic('check','l','stroke-width:2.4')}</div><h2 class="h2 c" style="margin-top:14px">Thanks, ${S.salesSent.name.split(' ')[0]}!</h2><p class="p c">Our sales team will contact you at <b style="color:var(--ink)">${S.salesSent.email}</b> within 1 business day.</p><button class="btn btn-p" style="margin-top:20px" data-act="supportDone">Back to Support center</button></div>`
+:`${safeTop()}${arrowTitle('Contact Sales')}<div class="scr"><div class="col pad" style="gap:18px;margin-top:10px;padding-bottom:40px">
+<div class="row" style="gap:14px;background:var(--tint);border-radius:20px;padding:16px"><span class="mtile violet">${ic('briefcase')}</span><p class="p" style="color:var(--ink2);font-size:15px">VesperVPN for your team: volume pricing, central billing and a dedicated account manager.</p></div>
+${fld('Full Name','sl-name',{ph:'Your name',val:S.user&&S.user!=='guest'?S.name:''})}
+${fld('Work Email','sl-email',{ph:'name@company.com',val:S.email||''})}
+${fld('Company','sl-co',{ph:'Company name'})}
+<div class="field"><span class="lbl">Team size</span><div class="chips" role="radiogroup" aria-label="Team size">${SIZES.map(x=>`<button class="chip chipb ${S.teamSize===x?'on':''}" role="radio" aria-checked="${S.teamSize===x}" data-act="teamSize" data-arg="${x}">${x}</button>`).join('')}</div><p class="errt" id="e-size"></p></div>
+<button class="btn btn-p" data-act="sendSales">Contact Sales</button></div></div>`;
+
+const POL='VesperVPN collects personal information that you provide to us directly through the Site. We require that you provide personal information, such as an email address and payment information, to establish a VesperVPN account and so that we can email you, collect payments from you, and respond to support queries that you initiate.';
+SC.terms=()=>`${safeTop()}${backTitle('Terms &amp; Privacy Policy')}<div class="scr" style="background:#F5F7FB"><div class="col pad" style="gap:12px;padding-bottom:120px;font-size:15px;line-height:1.65;color:var(--ink2)"><span class="small">Last update: 12 June 2026</span>
+<div class="mcard" style="padding:18px">How come the tech world produces cutting-edge innovative digital experience, and yet we are still stuck in an ancient world of legalese?<br>What makes a document legally binding? An ancient language full of "heretofores" and "thereupons" surely does not guarantee that.<br>That's why with VesperVPN we took a step forward and made our Privacy Policy and Terms of Service documents clear and easy to understand. Because our users deserve it.</div>
+<div class="row" style="justify-content:space-between;margin-top:8px"><p class="mlabel" style="margin:8px 4px">Policies</p><button class="lnk" style="border:0;background:none;font:inherit;font-size:14px;font-weight:600" data-act="toggleAll">Expand all</button></div>
+<div class="mcard accs" id="pol">
+${acc('Core Policy','VesperVPN collects personal information that you provide to us directly through the Site. We require that you provide personal information, such as an email address and payment information, to establish a VesperVPN account and so that we can email you, process payments, and respond to support queries that you initiate. The specific information collected varies depending on the payment method you choose. We collect only the minimum information necessary to complete your transaction and deliver our services.',1)}
+${acc('Privacy Policy',POL+'<br><br>'+POL,0)}
+${acc('Refund Policy',POL,0)}</div></div></div>${S.user?tabs('menu'):''}`;
+SC.update=()=>`${safeTop()}<div class="col pad" style="align-items:center;gap:16px;margin-top:150px"><div style="width:96px;height:96px;border-radius:50%;background:var(--grad)"></div><h1 class="h1 c" style="margin-top:46px">Update Required</h1><p class="p c" style="font-size:17px;line-height:1.75">A new version of VesperVPN is available. Please update the app to continue using our services.</p><div class="row" style="gap:8px;background:var(--soft);border-radius:999px;padding:10px 18px;font-size:14px;color:var(--mute);margin-top:12px">Current version: <b style="color:var(--ink)">1.2.0</b>${ic('next','s','width:12px;height:12px')}New version: <b style="color:var(--blue)">1.4.0</b></div></div>
+<div class="col pad" style="position:absolute;left:0;right:0;bottom:40px;gap:22px;align-items:center"><button class="btn btn-p" data-act="back">Update Now</button><a class="small u" style="color:var(--mute);font-size:17px;font-weight:600" data-act="back">Learn what's new</a></div>`;
+SC.suspended=()=>`${safeTop()}<div class="col pad" style="align-items:center;gap:16px;margin-top:220px"><div class="ib" style="width:100px;height:100px;box-shadow:none">${ic('shieldx','l')}</div><h1 class="h1 c" style="margin-top:24px;font-size:32px"><span class="gt">Account Suspended</span></h1><p class="p c" style="font-size:17px;line-height:1.75">Your account has been suspended due to a violation of our Terms of Service. Please contact support to resolve this issue.</p><button class="btn btn-p" style="margin-top:30px" data-act="go" data-arg="support">Contact Support</button></div><p class="small c" style="position:absolute;left:0;right:0;bottom:44px;margin:0">Account ID: #USR-00291</p>`;
+
+/* ================= overlays (bottom sheets & modals) ================= */
+const OV={};
+OV.guest=()=>sheet(`<div class="ib" style="margin-top:20px">${ic('user','l')}</div><h2 class="h2 c" style="font-size:26px;margin-top:6px">Continue as Guest?</h2><p class="p c" style="font-size:14px">Guest mode gives you limited access. Create a free account to unlock full features.</p><button class="btn btn-p" style="margin-top:10px" data-act="toSignup">Create Free Account</button><button class="btn btn-o" data-act="asGuest">${ic('alert')}Continue as Guest</button>`);
+OV.perm=()=>modal(`<div class="ib" style="width:60px;height:60px">${ic('shield','l')}</div><h2 class="h2 c" style="font-size:22px">Allow VPN Configuration</h2><p class="c" style="margin:0;font-size:14px;line-height:1.6">VesperVPN would like to add VPN configurations to your device. This allows the app to filter network traffic.</p><div style="width:100%;border-top:1px solid var(--line)"><div class="kv" style="border-bottom:1px solid var(--line);padding:14px 0"><span style="color:var(--ink)">Server</span><span>Free Auto-Select</span></div><div class="kv" style="border-bottom:1px solid var(--line);padding:14px 0"><span style="color:var(--ink)">Protocol</span><span>IKEv2</span></div><div class="kv" style="padding:14px 0"><span style="color:var(--ink)">Certificate</span><span>Verified ✓</span></div></div><div class="row" style="width:calc(100% + 48px);border-top:1px solid var(--line)"><a data-act="close" style="flex:1;text-align:center;padding:20px;font-size:18px;color:var(--ink);border-right:1px solid var(--line)">Don't Allow</a><a data-act="allow" style="flex:1;text-align:center;padding:20px;font-size:18px;color:var(--blue)">Allow</a></div>`,'padding-bottom:0;gap:12px');
+OV.created=()=>sheet(`<div class="row" style="width:100%;justify-content:center;position:relative;margin-top:16px"><div class="grab"></div><button data-act="close" aria-label="Close" style="position:absolute;right:0;top:-12px;width:40px;height:40px;border-radius:50%;background:var(--soft);border:0;display:flex;align-items:center;justify-content:center;color:var(--mute)">${ic('xc','s')}</button></div><div class="ib" style="width:64px;height:64px;margin-top:10px">${ic('sparkle','l')}</div><h2 class="h2 c" style="font-size:24px">Account Created!</h2><p class="p c" style="font-size:14px">Welcome to VesperVPN! Your account has been created successfully.</p><div class="col" style="width:100%;background:var(--soft);border-radius:20px;padding:18px 16px;gap:14px">${PLANS[0].f.map(t=>`<div class="row" style="gap:14px;font-size:14px">${ic('shield','s','color:var(--blue)')}${t}</div>`).join('')}</div><div class="row" style="width:100%;gap:12px;border:1px solid var(--line);background:#F3F6FB;border-radius:20px;padding:14px"><span class="ib" style="width:42px;height:42px;box-shadow:none">${ic('gift','s')}</span><div class="col" style="flex:1;gap:2px"><b style="font-size:16px;font-weight:600">7-Day Free Trial</b><span class="small">Coba semua fitur premium tanpa biaya.</span></div><a data-act="trialPlan" style="background:#fff;border-radius:12px;padding:10px 12px;font-size:14px;font-weight:600;color:var(--blue)">Mulai</a></div><button class="btn btn-p" data-act="explorePlans">Explore Plans</button>`,{nograb:1,st:'gap:14px'});
+OV.welcomeBack=()=>sheet(`<div class="ib" style="width:64px;height:64px;margin-top:24px">${ic('check','l')}</div><h2 class="h2 c" style="font-size:24px;margin-top:8px">Welcome Back!</h2><p class="p c" style="font-size:14px">You've successfully signed in to your account.</p><div class="row" style="width:100%;gap:16px;background:var(--soft);border-radius:20px;padding:16px;margin-top:10px"><span class="tile" style="width:48px;height:48px;border-radius:50%;background:#E5E7EB">${ic('user')}</span><div class="col" style="gap:6px"><b style="font-size:17px;font-weight:600">${S.name.split(' ').reverse().join(' ')}</b><span style="font-size:14px">${S.email}</span></div></div><button class="btn btn-p" style="margin-top:10px" data-act="close">Get Started</button>`);
+OV.limit=()=>`${S.user==='guest'&&!S.limitNoteHidden?`<div class="note topalert" role="status">${ic('info')}<div style="flex:1"><b>Why is there a daily limit?</b>Free accounts include 3 sessions per day. Upgrade to Premium for unlimited connections, faster servers, and no bandwidth caps.</div><button class="alert-x" data-act="hideLimitNote" aria-label="Dismiss">${ic('x','s')}</button></div>`:''}`+sheet(`<div class="ib" style="width:64px;height:64px">${ic('shield','l')}</div><h2 class="h2 c" style="font-size:24px">You've Hit Today's Free Limit</h2><p class="c" style="margin:0;font-size:16px;line-height:1.6">You've used your ${S.user==='guest'?'500 MB':'1 GB'} of free data for today.</p><button class="btn btn-p" style="margin-top:16px" data-act="upgrade">Upgrade Plan — Unlimited Access</button><a class="small u" style="color:var(--mute);font-size:14px" data-act="close">Come Back Tomorrow</a><p class="small c row" style="gap:6px;margin:8px 0 0;font-size:14px;color:var(--ink)">${ic('info','s','width:14px;height:14px')}Free data resets daily at midnight</p>`,{nograb:1,st:'padding-top:30px'});
+OV.trial=()=>sheet(`<h2 class="h1" style="align-self:flex-start;font-size:26px">7 Days Free Trial</h2><p class="p" style="font-size:16px;align-self:flex-start;margin-top:-4px">Try Premium for free, no charge today</p><div class="col" style="gap:18px;margin:12px 0 10px;align-self:flex-start">${['Unlimited Data','All 50+ Countries','5 Simultaneous Devices'].map(t=>`<div class="dot-li">${t}</div>`).join('')}</div><button class="btn btn-p" data-act="trialPlan">Start Free Trial</button><a class="small c" style="color:var(--mute);font-size:13px" data-act="close">No thanks, continue free</a>`,{nograb:1,st:'padding:34px 24px 26px;gap:12px'});
+OV.notif=()=>modal(`<div class="ib sq" style="width:64px;height:64px;border-radius:16px;box-shadow:none">${ic('bell','l')}</div><h2 class="h2 c" style="font-size:24px;margin-top:6px">Stay Connected</h2><p class="p c" style="font-size:14px">Enable notifications to get alerts when your VPN disconnects or your trial is about to expire.</p><button class="btn btn-p" style="margin-top:8px" data-act="close">Allow Notifications</button><a class="small u" style="color:var(--mute);font-size:14px" data-act="close">Maybe Later</a>`,'padding:32px 32px 40px');
+OV.rate=()=>modal(`<div class="ib sq" style="width:64px;height:64px;border-radius:16px;box-shadow:none">${ic('xc','l')}</div><h2 class="h2 c" style="font-size:24px;margin-top:6px">Enjoying VesperVPN?</h2><p class="p c" style="font-size:14px">Rate us on the App Store to help others discover us!</p><div class="stars" style="gap:10px;margin:8px 0">${[1,2,3,4,5].map(n=>`<button data-act="star" data-arg="${n}" aria-label="${n} stars">${ic('star',n<=S.stars?'on':'','width:32px;height:32px')}</button>`).join('')}</div><button class="btn btn-p" data-act="close">Rate Now</button><a class="small u" style="color:var(--mute);font-size:14px" data-act="close">Not Now</a>`,'padding:32px 32px 40px');
+OV.rateSheet=()=>sheet(`<div style="width:64px;height:64px;border-radius:50%;background:var(--grad);margin-top:30px"></div><h2 class="h2 c" style="font-size:24px">Enjoying VesperVPN?</h2><p class="p c" style="font-size:17px">Your feedback helps us improve!</p><div class="stars" style="gap:16px;margin-top:20px">${[1,2,3,4,5].map(n=>`<button data-act="star" data-arg="${n}" aria-label="${n} stars">${ic('star',n<=S.stars?'on':'','width:36px;height:36px')}</button>`).join('')}</div><p class="small" style="margin:6px 0 14px">Tap a star to rate</p><button class="btn btn-p" data-act="close" ${S.stars?'':'disabled'}>Submit Rating</button><a style="color:var(--mute);font-size:16px;font-weight:600;margin-top:8px" data-act="close">Maybe Later</a>`,{nograb:1});
+OV.signout=()=>modal(`<h2 class="h2 c" style="font-size:20px">Sign Out?</h2><p class="p c" style="font-size:16px;line-height:1.6">Are you sure you want to sign out of your account?</p><div class="row" style="gap:12px;width:100%;margin-top:22px"><button class="btn btn-g" data-act="close">Cancel</button><button class="btn btn-p" data-act="signout">Sign Out</button></div>`,'gap:12px;padding:26px 24px');
+OV.delete=()=>modal(`<div class="ib" style="width:64px;height:64px;background:#FFF1F1;color:var(--err);box-shadow:none">${ic('trash','l')}</div><h2 class="h2 c" style="font-size:24px">Delete Account</h2><p class="p c" style="font-size:16px;line-height:1.6">Are you sure you want to delete your account? This action cannot be undone.</p><span class="small" style="margin:4px 0">Step 2 of 2</span>${fld('Enter your password to confirm','del-pw',{type:'password',ph:'Password',fst:'width:100%'})}<button class="btn btn-p" id="delBtn" data-act="doDelete" disabled style="margin-top:6px">Delete Account</button><button class="btn btn-o" data-act="close" style="color:var(--err);border-color:var(--err)">Cancel</button>`,'gap:12px');
+OV.cancelled=()=>sheet(`<div style="width:88px;height:88px;border-radius:50%;background:#E8F5E9;display:flex;align-items:center;justify-content:center;margin-top:30px"><div style="width:56px;height:56px;border-radius:50%;background:#4CAF50;color:#fff;display:flex;align-items:center;justify-content:center">${ic('check','','stroke-width:2.4')}</div></div><h2 class="h1 c" style="font-size:28px;margin-top:10px">Subscription Cancelled</h2><p class="p c" style="font-size:14px">Your subscription has been cancelled. You still have access until 12 March 2026.</p><button class="btn btn-p" style="margin-top:14px" data-act="tab" data-arg="home">Back to Home</button><a class="u" style="color:var(--mute);font-size:17px;font-weight:600" data-act="tab" data-arg="subscription">View Subscription Details</a>`,{lock:1});
+OV.setup=()=>{const s=profile().setup||{},d=setupDone(s),all=d===SETUP.length;return sheet(`
+<div class="row" style="gap:14px;width:100%;margin-top:6px"><div style="position:relative;width:56px;height:56px;flex:none">${ring(d,SETUP.length,56)}<b style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px">${d}/${SETUP.length}</b></div>
+<div class="col" style="gap:2px;flex:1"><h2 class="h2" style="font-size:22px">${all?'You\'re all set!':'Get started with VesperVPN'}</h2><span class="small">${all?'Your VPN is ready. Stay safe online.':`${SETUP.length-d} steps left to finish setup`}</span></div></div>
+<div class="setlist" role="list">${SETUP.map(x=>{const done=!!s[x.k];return `<div class="setitem ${done?'done':''}" role="listitem"><span class="setchk" aria-hidden="true">${done?ic('check','s'):''}</span><div class="col" style="flex:1;gap:2px;min-width:0"><b>${x.t}</b><span class="small">${x.s}</span></div>${!done&&x.go?`<button class="setgo" data-act="${x.go}" aria-label="${x.t}">Start</button>`:`<span class="sr-only">${done?'Done':''}</span>`}</div>`}).join('')}</div>
+${all?`<button class="btn btn-p" data-act="hideSetup">Finish</button>`:`<button class="clink" style="font-size:15px" data-act="hideSetup">Hide checklist</button>`}`,{st:'gap:16px;align-items:stretch'})};
+OV.signinContinue=()=>sheet(`<h2 class="h2 c" style="font-size:26px">Sign In to Continue</h2><p class="c" style="margin:0;font-size:17px;line-height:1.5">Create a free account or sign in to activate your plan.</p><button class="btn btn-p" style="margin-top:8px" data-act="toSigninBack">Sign In</button><button class="btn btn-o" data-act="toSignupBack">${ic('alert')}Create Account</button><span style="font-size:15px;margin:6px 0">or</span><button class="btn btn-o" data-act="google"><span class="gl">G</span>Continue with Google</button><p class="small c" style="margin:8px 0 0;color:var(--ink)">By continuing you agree to our <a class="u" style="color:var(--ink)" data-act="go" data-arg="terms">Terms &amp; Privacy Policy</a></p>`,{nograb:1,st:'padding-top:36px;gap:14px'});
+
+/* ================= coach marks (one shared component) =================
+   Every hint uses the same card: spotlight on the target, white card with arrow,
+   optional title, body, step counter and Skip / Next. Positioned after render. */
+const TOUR=[
+ {t:'[data-tour="connect"]',title:'Tap this button',body:'to start connecting to the VPN'},
+ {t:'[data-tour="loc"]',title:'Tap to choose your free country',body:'Pick one of the 5 free locations, or let us pick the fastest one.'},
+ {t:'[data-tour="qc"]',title:'Quick Connect',body:'Your favorite and recent servers appear here for one-tap connecting.'},
+ {t:'.tabs .tab:last-child',title:'Menu',body:'Find your account, settings, subscription and support here.'}];
+function activeCoach(){
+  if(S.ov)return null;
+  if(S.screen==='home'&&S.tour!=null&&S.vpn!=='connecting'&&TOUR[S.tour])return {...TOUR[S.tour],step:S.tour+1,total:TOUR.length,dim:true};
+  if(S.screen==='home'&&S.guestTipShow&&S.user==='guest')return {t:'[data-tour="guest"]',title:'Guest mode',body:'Guests receive 500 MB of data. Sign up for a free account for 1 GB/day.',ok:'Got it',okAct:'guestTip'};
+  if(S.screen==='signup'&&S.guestHint)return {t:'[data-tour="guestbtn"]',title:'Continue as Guest',body:'Limited data & servers · no account needed',ok:'Got it',okAct:'hideHint'};
+  return null;
+}
+function coachHTML(){const c=activeCoach();if(!c)return '';
+  return `<div class="spot ${c.dim?'':'light'}" id="spot" aria-hidden="true"></div><div class="coach" id="coach" role="dialog" aria-live="polite" aria-label="${c.title}" data-target='${c.t}'><span class="carrow"></span>
+  ${c.step?`<span class="cstep">Step ${c.step} of ${c.total}</span>`:''}<b class="ctitle">${c.title}</b><p class="cbody">${c.body}</p>
+  <div class="cfoot">${c.step?`<button class="clink" data-act="tourSkip">Skip tour</button><button class="cbtn" data-act="tourNext">${c.step===c.total?'Done':'Next'}</button>`:`<span></span><button class="cbtn" data-act="${c.okAct}">${c.ok}</button>`}</div></div>`}
+function placeCoach(){
+  const c=$('#coach'),sp=$('#spot'),ph=$('.ph');if(!c||!ph)return;
+  const tg=document.querySelector(c.dataset.target);if(!tg){c.remove();sp&&sp.remove();return}
+  const sc=tg.closest('.scr');if(sc){const a=tg.getBoundingClientRect(),b=sc.getBoundingClientRect();if(a.bottom>b.bottom-90||a.top<b.top+8)sc.scrollTop+=a.top-b.top-(b.height-a.height)/2}
+  const P=ph.getBoundingClientRect(),r=tg.getBoundingClientRect(),pad=6;
+  const x=r.left-P.left,y=r.top-P.top,cx=x+r.width/2;
+  const rad=parseFloat(getComputedStyle(tg).borderTopLeftRadius)||12;
+  Object.assign(sp.style,{left:x-pad+'px',top:y-pad+'px',width:r.width+pad*2+'px',height:r.height+pad*2+'px',borderRadius:rad+pad+'px'});
+  const w=Math.min(P.width-32,340);c.style.width=w+'px';
+  const left=Math.max(16,Math.min(P.width-16-w,cx-w/2));c.style.left=left+'px';
+  const h=c.offsetHeight,below=y+r.height+pad+14+h<P.height-20;
+  c.style.top=(below?y+r.height+pad+14:y-pad-14-h)+'px';c.classList.toggle('above',!below);
+  c.querySelector('.carrow').style.left=Math.max(20,Math.min(w-20,cx-left))+'px';
+}
+addEventListener('resize',placeCoach);
+document.addEventListener('scroll',e=>{if($('#coach')&&e.target.classList&&e.target.classList.contains('scr'))placeCoach()},true);
+
+/* ================= getting-started checklist (new accounts) ================= */
+const SETUP=[
+ {k:'account',t:'Create your account',s:'You\'re in. Welcome to VesperVPN!'},
+ {k:'connect',t:'Connect to the VPN',s:'Tap Connect on Home to secure your traffic.',go:'tourConnect'},
+ {k:'server',t:'Choose a server location',s:'Pick a country and city in Server List.',go:'setupServers'},
+ {k:'fav',t:'Add a favorite server',s:'Tap the heart next to a country.',go:'setupServers'},
+ {k:'notif',t:'Review notification alerts',s:'Choose which alerts you want to get.',go:'setupNotif'}];
+const setup=()=>{const p=profile();return S.session==='user'&&p.setup&&!p.setup.hidden?p.setup:null};
+const setupDone=s=>SETUP.filter(x=>s[x.k]).length;
+function markSetup(k){const s=setup();if(!s||s[k])return;s[k]=true;const d=setupDone(s);
+  $('#live')&&($('#live').textContent=`Checklist: ${SETUP.find(x=>x.k===k).t} done. ${d} of ${SETUP.length} complete.`);
+  if(d===SETUP.length)S.setupCelebrate=true}
+const ring=(d,n,size=44)=>{const r=size/2-4,C=2*Math.PI*r;return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true" style="transform:rotate(-90deg)"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#DCE5FB" stroke-width="4"/><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="url(#rg)" stroke-width="4" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-d/n)}" style="transition:stroke-dashoffset .5s"/><defs><linearGradient id="rg"><stop offset="0" stop-color="#1E3FAE"/><stop offset="1" stop-color="#4361EE"/></linearGradient></defs></svg>`};
+
+/* ================= render & navigation ================= */
+let lastScreen=null;
+function render(){
+  const keep=lastScreen===S.screen?($('.scr')||{}).scrollTop:0;
+  const fx=S.fx;S.fx=null;
+  $('#app').innerHTML=`<div class="ph ${lastScreen!==S.screen?'screen-in':''} ${fx?'fx-'+fx:''}">${SC[S.screen]()}${S.ov&&OV[S.ov]?OV[S.ov]():''}${coachHTML()}</div>`;
+  if($('#coach')){placeCoach();requestAnimationFrame(placeCoach);later('coach',placeCoach,620);document.fonts&&document.fonts.ready.then(placeCoach)}
+  const sc=$('.scr');if(sc&&keep)sc.scrollTop=keep;
+  lastScreen=S.screen;save();
+  if(S.screen==='otp'&&!S.otpErr){const f=document.querySelector('#otp input');f&&f.focus()}
+  if(S.screen==='onboard')obAuto();
+}
+/* onboarding carousel: auto-advance, dots, swipe — moves the track without re-rendering */
+function obSet(i){S.ob=(i+OB.length)%OB.length;const tr=$('#obtrack');if(!tr)return;tr.style.transform=`translateX(-${S.ob*100}%)`;
+  document.querySelectorAll('.obslide').forEach((s,k)=>k===S.ob?s.removeAttribute('aria-hidden'):s.setAttribute('aria-hidden','true'));
+  document.querySelectorAll('.obdot').forEach((d,k)=>{d.classList.toggle('on',k===S.ob);d.setAttribute('aria-selected',k===S.ob)});save();obAuto()}
+function obAuto(){later('ob',()=>{if(S.screen==='onboard')obSet(S.ob+1)},4500)}
+let obX=null;
+document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('#obview'))obX=e.clientX});
+document.addEventListener('pointerup',e=>{if(obX==null)return;const dx=e.clientX-obX;obX=null;if(Math.abs(dx)>40)obSet(S.ob+(dx<0?1:-1))});
+/* route guard: which screens need a session */
+const PUBLIC=['splash','onboard','signup','signin','verify','otp','forgot','checkEmail','setPw','deleted','suspended','terms','support','about','update','offline','emailSupport','chat','sales'];
+const GUEST_OK=['home','servers','menu','plans','notifications'];
+const allowed=s=>!!SC[s]&&(PUBLIC.includes(s)||(S.session==='user')||(S.session==='guest'&&GUEST_OK.includes(s)));
+const fallback=()=>S.session?'home':'signin';
+function go(s){if(!allowed(s))s=fallback();S.hist.push(S.screen);S.screen=s;S.ov=null;enter(s);history.pushState({d:S.hist.length},'','#'+s);render()}
+function goRoot(s){if(!allowed(s))s=fallback();S.hist=[];S.screen=s;S.ov=null;enter(s);history.replaceState({d:0},'','#'+s);render()}
+function goUnder(parent,s){S.hist=[parent];S.screen=s;S.ov=null;enter(s);history.replaceState({d:1},'','#'+s);render()}
+function popBack(){if(S.ov){S.ov=null;render();return}if(S.search){S.search=false;S.q='';render();return}
+  const from=S.screen;let s=S.hist.pop();while(s&&!allowed(s))s=S.hist.pop();S.screen=s||fallback();enter(S.screen,from);render()}
+function back(){if(history.state&&history.state.d>0)history.back();else popBack()}
+addEventListener('popstate',()=>{if(['processing','welcome','deleted'].includes(S.screen)){history.pushState({d:S.hist.length},'','#'+S.screen);return}popBack()});
+function enter(s,from){
+  S.guestTipShow=false;
+  if(s==='servers'&&!from){S.srvErr=!navigator.onLine;if(!S.srvErr&&!S.srvSeen){S.srvSeen=true;S.srvLoading=true;later('srv',()=>{S.srvLoading=false;if(S.screen==='servers')render()},900)}}
+  if(s==='otp')S.otpErr=false;
+  if(s==='notifications')markSetup('notif');
+  if(s==='home'&&S.setupCelebrate&&!S.ov){S.setupCelebrate=false;S.ov='setup'}
+  if(s==='emailSupport'){S.sentEmail=null;S.topic=null}
+  if(s==='sales'){S.salesSent=null;S.teamSize=null}
+  if(s==='chat'&&!S.chat.length)S.chat=[{t:"Hi, I'm Maya from VesperVPN Support. How can I help you today?"}];
+  if(s==='settings')S.info=from==='split'?'split':null;
+  if(s==='menu'&&!from&&S.user==='premium'&&!S.rateMenu&&S.rateHome){S.rateMenu=true;S.stars=0;S.ov='rateSheet'}
+}
+const openOv=o=>{S.ov=o;S.stars=0;S.limitNoteHidden=false;render()};
+
+/* ================= session ================= */
+function startSession(kind,email){
+  VPN.reset();Object.assign(S,{loc:null,tour:null,ov:null,planSel:null,search:false,q:'',exp:null,pending:null,guestTipShow:false});
+  if(kind==='guest'){S.session='guest';S.email='';S.guest=newProfile({data:QUOTA.guest})}
+  else{S.session='user';S.email=email}
+}
+function endSession(){VPN.reset();Object.assign(S,{session:null,loc:null,ov:null,planSel:null,tour:null,signVariant:0,search:false,q:''})}
+
+/* ================= VPN state machine: off → connecting → on | fail ================= */
+const FASTEST={c:'au',n:'Australia',city:'Melbourne'};
+const VPN={
+  connect(){
+    if(S.vpn==='connecting'||S.vpn==='on')return;
+    if(S.tour===0)S.tour=1;S.guestTipShow=false;
+    if(isFree()&&S.data<=0)return openOv('limit');
+    if(!S.perm)return openOv('perm');
+    S.vpn='connecting';S.fx='connecting';S.connAt=Date.now();render();
+    [600,1200].forEach((ms,i)=>later('step'+i,()=>{const s=$('#cstep');if(s&&S.vpn==='connecting'){s.textContent=['Securing connection…','Encrypting traffic…'][i];s.classList.remove('swap');void s.offsetWidth;s.classList.add('swap')}},ms));
+    later('vpn',()=>{
+      if(S.vpn!=='connecting')return;
+      if(!navigator.onLine||(S.loc&&S.loc.c==='cn')){S.vpn='fail';S.fx='fail';return render()}
+      S.vpn='on';S.since=Date.now();S.fx='on';markSetup('connect');
+      {const c=S.loc||FASTEST;S.qc=[{c:c.c,n:c.n,city:c.city},...S.qc.filter(q=>q.c!==c.c)].slice(0,3)}
+      if(S.user==='premium'&&!S.notifAsked){S.notifAsked=true;S.ov='notif'}
+      render();
+    },1800);
+  },
+  cancel(){stop('vpn');S.vpn='off';S.fx='off';render()},
+  disconnect(prompts=true){
+    if(S.vpn!=='on')return;
+    S.vpn='off';S.since=0;S.fx='off';
+    if(prompts){
+      if(S.user==='free'&&!S.trialShown){S.trialShown=true;S.ov='trial'}
+      else if(S.user==='premium'&&!S.rateHome){S.rateHome=true;S.stars=0;S.ov='rate'}
+    }
+    render();
+  },
+  fail(){stop('vpn');S.vpn='fail';S.fx='fail'},
+  reset(){stop('vpn');S.vpn='off';S.since=0},
+  switchTo(loc,forceConnect){const active=S.vpn==='on'||S.vpn==='connecting';this.reset();S.loc=loc;goRoot('home');if(active||forceConnect)this.connect()}
+};
+
+const A={
+  noop:()=>{},back,go,
+  close:()=>{S.ov=null;render()},ov:(a)=>openOv(a),
+  tab:(a)=>{S.ov=null;S.search=false;if(a==='subscription')return goUnder('menu','subscription');goRoot(a)},
+  eye:(id,el)=>{const i=$('#'+id);i.type=i.type==='password'?'text':'password';el.style.color=i.type==='text'?'var(--blue)':''},
+  agree:()=>{S.agree=!S.agree;const c=$('#chk');c.classList.toggle('on',S.agree);c.style.boxShadow='';c.style.borderColor=''},
+  toSignin:()=>{S.signVariant=0;goRoot('signin')},
+  toSignup:()=>{S.signVariant=0;goRoot('signup');if(!S.hintShown){S.hintShown=true;S.guestHint=true;render()}},
+  toSigninBack:()=>{S.signVariant=1;go('signin')},toSignupBack:()=>{S.signVariant=1;go('signup')},
+  google:()=>{startSession('user','demouser@email.com');goRoot('home');openOv('welcomeBack')},
+  signup:()=>{const e=val('su-email').trim(),p=val('su-pw'),p2=val('su-pw2');let ok=true;
+    setErr('su-email',!emailOk(e)?(ok=false,'Enter a valid email or phone number.'):'');
+    setErr('su-pw',p.length>=8?'':(ok=false,'Password must be at least 8 characters.'));
+    setErr('su-pw2',p2&&p2===p?'':(ok=false,'Passwords do not match.'));
+    if(!S.agree){ok=false;const c=$('#chk');c.style.boxShadow='0 0 0 4px rgba(229,72,77,.25)';c.style.borderColor='#E5484D'}
+    if(ok){S.pending={e,p};S.email=e;S.otpFor='signup';go('verify')}},
+  signin:()=>{const e=val('si-email').trim(),p=val('si-pw');
+    if(!emailOk(e)){setErr('si-email','Enter a valid email or phone number.');return}
+    if(e==='suspended@email.com'){goRoot('suspended');return}
+    const acc=S.accounts[e];
+    if(!acc||acc.pw!==p){setErr('si-email',' ');setErr('si-pw','Incorrect email or password. Please try again.');$('#authErr').innerHTML=`<div style="background:var(--err-bg);border:1px solid #FDA29B;color:#B42318;border-radius:12px;padding:14px 22px;font-size:15px">Authentication failed. Please check your credentials.</div>`;return}
+    S.pending={e};S.email=e;S.otpFor='signin';go('otp')},
+  forgot:()=>{const e=val('fp-email').trim();if(!emailOk(e)){setErr('fp-email','Enter a valid email or phone number.');return}S.resetEmail=e;S.otpFor='reset';go('checkEmail')},
+  otp:()=>{const code=[...document.querySelectorAll('#otp input')].map(i=>i.value).join('');
+    if(code.length<4){S.otpErr=true;render();[...document.querySelectorAll('#otp input')].forEach((i,k)=>i.value=code[k]||'');return}
+    if(S.otpFor==='reset'){goRoot('setPw');return}
+    const pend=S.pending;if(!pend){goRoot('signin');return}
+    if(S.otpFor==='signin'){startSession('user',pend.e);goRoot('home');openOv('welcomeBack');return}
+    S.accounts[pend.e]=newProfile({pw:pend.p,setup:{account:true,connect:false,server:false,fav:false,notif:false,hidden:false}});startSession('user',pend.e);S.tour=0;goRoot('home');openOv('created')},
+  setPw:()=>{const p=val('np-pw'),p2=val('np-pw2');let ok=true;
+    setErr('np-pw',p.length>=8?'':(ok=false,'Password must be at least 8 characters.'));
+    setErr('np-pw2',p2===p&&p2?'':(ok=false,'Passwords do not match.'));
+    if(ok){if(S.accounts[S.resetEmail])S.accounts[S.resetEmail].pw=p;S.signVariant=0;goRoot('signin')}},
+  asGuest:()=>{startSession('guest');goRoot('home')},
+  explorePlans:()=>{S.planSel=null;go('plans')},
+  tourNext:()=>{S.tour=S.tour+1<TOUR.length?S.tour+1:null;if(S.tour==null&&setup())openOv('setup');else render()},
+  tourSkip:()=>{S.tour=null;render()},
+  tourConnect:()=>{S.ov=null;S.tour=0;goRoot('home')},
+  setupServers:()=>{S.ov=null;goRoot('servers')},
+  setupNotif:()=>{S.ov=null;goRoot('menu');go('notifications')},
+  hideSetup:()=>{const p=profile();if(p.setup)p.setup.hidden=true;S.ov=null;render()},
+  hideHint:()=>{S.guestHint=false;render()},
+  guestTip:()=>{S.guestTipShow=!S.guestTipShow;render()},
+  power:()=>{if(S.vpn==='on')VPN.disconnect();else if(S.vpn==='connecting')VPN.cancel();else VPN.connect()},
+  connect:()=>VPN.connect(),
+  allow:()=>{S.perm=true;S.ov=null;VPN.connect()},
+  cancelConn:()=>VPN.cancel(),
+  disconnect:()=>VPN.disconnect(),
+  qc:(i)=>{const l=quick()[+i];if(l)VPN.switchTo({c:l.c,n:l.n,city:l.city},true)},
+  upgrade:()=>{if(S.user==='guest')return openOv('signinContinue');S.planSel=null;go('plans')},
+  locked:()=>A.upgrade(),
+  openSearch:()=>{S.search=true;history.pushState({d:S.hist.length+1},'','#servers');render();$('#srch').focus()},
+  exp:(c)=>{S.exp=S.exp===c?null:c;render()},
+  fav:(c)=>{const co=COUNTRIES.find(x=>x[0]===c);if(!co)return;const was=isFav(c);
+    S.fav=was?S.fav.filter(f=>f.c!==c):[{c,n:co[1],city:co[2][0]},...S.fav];
+    S.favPop=was?null:c;if(!was)markSetup('fav');const keep=$('.scr')&&$('.scr').scrollTop;
+    if(S.search){$('#slist').innerHTML=srvRows()}else render();
+    if(keep&&$('.scr'))$('.scr').scrollTop=keep;S.favPop=null;
+    $('#live').textContent=was?co[1]+' removed from favorites':co[1]+' added to favorites. It now appears in Quick Connect on Home.'},
+  pick:(a)=>{const [c,city]=a.split('|');const co=COUNTRIES.find(x=>x[0]===c);if(!co)return;markSetup('server');S.exp=null;S.search=false;S.q='';VPN.switchTo({c,n:co[1],city})},
+  retrySrv:()=>{S.srvErr=!navigator.onLine;render()},
+  retryNet:()=>{if(navigator.onLine)goRoot('home')},
+  plan:(id)=>{S.planSel=S.planSel===id?null:id;render()},
+  trialPlan:()=>{S.planSel='year';S.ov=null;if(S.user==='guest')return openOv('signinContinue');go('plans')},
+  planGo:()=>{const p=planOf(S.planSel);if(!p)return;
+    if(S.user==='guest')return openOv('signinContinue');
+    if(p.id==='free')return goRoot('home');
+    go('checkout')},
+  pay:()=>{S.coName=val('co-name').trim();S.coEmail=val('co-email').trim();
+    if(!emailOk(S.coEmail)){setErr('co-email','Enter a valid email or phone number.');return}
+    const planId=S.planSel;go('processing');
+    later('pay',()=>{if(S.screen!=='processing')return;
+      if(!S.coName){S.screen='payfail';history.replaceState({d:S.hist.length},'','#payfail');return render()}
+      const acc=S.accounts[S.email];if(!acc)return goRoot('signin');
+      Object.assign(acc,{premium:true,plan:planId,cancelled:false,trialEnded:!!planOf(planId).trial,qc:[]});
+      VPN.reset();S.loc=null;S.hist=[];S.screen='welcome';history.replaceState({d:0},'','#welcome');render()},2000)},
+  startPremium:()=>goRoot('home'),
+  trialCancel:()=>{S.trialEnded=false;go('cancelReason')},trialPay:()=>{S.trialEnded=false;render()},
+  reactivate:()=>{S.cancelled=false;render()},
+  keepSub:()=>goUnder('menu','subscription'),
+  doCancel:()=>{S.cancelled=true;openOv('cancelled')},
+  reason:(i)=>{S.reason=+i;render()},
+  saveProfile:()=>{const n=val('ep-name').trim();if(!n){setErr('ep-name','Enter your full name.');return}S.name=n;S.phone=val('ep-phone');back()},
+  changePw:()=>{const c=val('cp-cur'),n=val('cp-new'),n2=val('cp-new2'),acc=S.accounts[S.email];if(!acc)return goRoot('signin');let ok=true;
+    setErr('cp-cur',c===acc.pw?'':(ok=false,'Incorrect current password'));
+    if(n.length<8){ok=false;$('#w-cp-new').classList.add('err');$('#sl-cp-new').style.color='var(--err)'}
+    setErr('cp-new2',n2&&n2===n?'':(ok=false,'Passwords do not match'));
+    if(ok){acc.pw=n;go('pwUpdated')}},
+  toAccount:()=>goUnder('menu','account'),
+  doDelete:()=>{const e=S.email;endSession();delete S.accounts[e];S.email='';goRoot('deleted')},
+  signout:()=>{endSession();goRoot('signin')},
+  set:(k)=>{S.set[k]=!S.set[k];if(k==='kill')S.info='kill';render()},
+  info:(k)=>{S.info=k;render()},
+  split:(k)=>{S.split[k]=!S.split[k];render()},
+  notif:(k)=>{S.notif[k]=!S.notif[k];render()},
+  proto:(k)=>{S.proto=k;render()},protoHelp:(k)=>{S.protoHelp=k;render()},
+  faq:(i)=>{S.faq=S.faq===+i?-1:+i;render()},
+  obGo:(i)=>obSet(+i),
+  topic:(x)=>{S.topic=x;pickChip('topic',x,'e-topic')},teamSize:(x)=>{S.teamSize=x;pickChip('teamSize',x,'e-size')},
+  supportDone:()=>{S.sentEmail=null;S.salesSent=null;back()},
+  sendEmail:()=>{const e=val('es-email').trim(),m=val('es-msg').trim();let ok=true;
+    setErr('es-email',emailOk(e)?'':(ok=false,'Enter a valid email address.'));
+    setErr('es-msg',m.length>=10?'':(ok=false,'Please describe your issue (at least 10 characters).'));
+    $('#e-topic').textContent=S.topic?'':(ok=false,'Choose a topic.');
+    if(ok){S.ticket=(S.ticket||10230)+1;S.sentEmail=e;render()}},
+  sendSales:()=>{const n=val('sl-name').trim(),e=val('sl-email').trim(),c=val('sl-co').trim();let ok=true;
+    setErr('sl-name',n?'':(ok=false,'Enter your name.'));setErr('sl-email',emailOk(e)?'':(ok=false,'Enter a valid work email.'));setErr('sl-co',c?'':(ok=false,'Enter your company name.'));
+    $('#e-size').textContent=S.teamSize?'':(ok=false,'Choose your team size.');
+    if(ok){S.salesSent={name:n,email:e};render()}},
+  chatQuick:(q)=>chatSay(q),
+  chatSend:()=>{const i=$('#chatIn');const m=(i&&i.value||'').trim();if(!m)return i&&i.focus();chatSay(m)},
+  toggleAll:(a,el)=>{const ds=[...document.querySelectorAll('#pol details')];const open=!ds.every(d=>d.open);ds.forEach(d=>d.open=open);el.textContent=open?'Collapse all':'Expand all'},
+  star:(n)=>{S.stars=+n;render()},
+  hideLimitNote:()=>{S.limitNoteHidden=true;render()}
+};
+
+function pickChip(act,x,errId){document.querySelectorAll(`[data-act="${act}"]`).forEach(b=>{const on=b.dataset.arg===x;b.classList.toggle('on',on);b.setAttribute('aria-checked',on)});const e=$('#'+errId);if(e)e.textContent=''}
+function chatReply(m){const s=m.toLowerCase();
+  if(/connect|slow|speed|server|wifi/.test(s))return 'Sorry about that! Try switching the protocol in Menu › Protocols, or pick a server close to you in Server List. Are you on Wi-Fi or mobile data?';
+  if(/bill|pay|charge|refund|card/.test(s))return 'I can help with billing. You can see all payments in Menu › My Subscription. Refunds are available within 30 days. Would you like me to start one?';
+  if(/plan|upgrade|premium|cancel/.test(s))return 'You can change or cancel your plan anytime in Menu › My Subscription. The 1 Year plan is the best value at $3.33/mo.';
+  return 'Thanks for the details! I\'ve noted this for our team. Is there anything else I can help you with?'}
+function chatSay(m){S.chat.push({me:1,t:m.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))});S.chatTyping=true;render();chatBottom();
+  later('chat',()=>{S.chatTyping=false;S.chat.push({t:chatReply(m)});if(S.screen==='chat'){render();chatBottom()}},1300)}
+function chatBottom(){const c=$('#chatScroll');if(c)c.scrollTop=c.scrollHeight;const i=$('#chatIn');if(i)i.focus()}
+
+/* ================= events ================= */
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]');if(!el||el.disabled)return;
+  const act=el.dataset.act;if(!act||!A[act])return;
+  e.preventDefault();e.stopPropagation();A[act](el.dataset.arg,el,e);
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='srch'){S.q=t.value;$('#slist').innerHTML=srvRows();return}
+  if(t.id==='appq'){const q=t.value.toLowerCase();document.querySelectorAll('[data-app]').forEach(r=>r.style.display=r.dataset.app.toLowerCase().includes(q)?'':'none');return}
+  if(t.closest('.inp'))setErr(t.id,'');
+  if(t.id==='es-msg'&&t.value.length>=10)setErr('es-msg','');
+  if(t.id==='su-pw'&&$('#st-su-pw')){const s=strength(t.value),bars=[...$('#st-su-pw').children],col=['#CBD5E1','#E5484D','#F59E0B','#3B82F6','#10B981'][s];
+    bars.forEach((b,i)=>b.style.background=i<s?col:'');const l=$('#sl-su-pw');l.textContent=t.value?['Weak','Weak','Fair','Good','Strong'][s]:'Strength';l.style.color=t.value?col:''}
+  if(t.id==='cp-new'){let st=$('#st-cp-new');const s=strength(t.value),l=$('#sl-cp-new');
+    if(t.value.length>=8){if(!st){l.insertAdjacentHTML('beforebegin','<div class="str" id="st-cp-new"><i></i><i></i><i></i></div>');st=$('#st-cp-new')}const n=Math.max(1,Math.min(3,s-1));const col=n===3?'#10B981':n===2?'#F59E0B':'#E5484D';[...st.children].forEach((b,i)=>b.style.background=i<n?col:'');l.textContent=['','Weak','Medium','Strong'][n];l.style.color=col}
+    else{if(st)st.remove();l.textContent='Minimum 8 characters';l.style.color=''}}
+  if(t.id==='si-email'||t.id==='si-pw'){$('#siBtn').disabled=!(val('si-email')&&val('si-pw'));$('#authErr').innerHTML='';setErr('si-email','');setErr('si-pw','')}
+  if(t.id==='del-pw')$('#delBtn').disabled=t.value!==((S.accounts[S.email]||{}).pw);
+  if(t.closest('#otp')){t.value=t.value.replace(/\D/g,'').slice(-1);if(t.value&&t.nextElementSibling)t.nextElementSibling.focus();$('#otp').classList.remove('err')}
+});
+document.addEventListener('keydown',e=>{
+  const t=e.target;
+  if(t.id==='chatIn'&&e.key==='Enter'){e.preventDefault();A.chatSend();return}
+  if(t.closest&&t.closest('#otp')&&e.key==='Backspace'&&!t.value&&t.previousElementSibling)t.previousElementSibling.focus();
+  if(e.key==='Enter'&&t.tagName==='INPUT'){const b=t.closest('.ph').querySelector('.btn-p[data-act]');if(b&&!b.disabled)b.click()}
+});
+document.addEventListener('paste',e=>{const t=e.target;if(!t.closest||!t.closest('#otp'))return;e.preventDefault();const d=(e.clipboardData.getData('text')||'').replace(/\D/g,'').slice(0,4);[...document.querySelectorAll('#otp input')].forEach((i,k)=>i.value=d[k]||'')});
+addEventListener('offline',()=>{if(S.vpn==='on'||S.vpn==='connecting')VPN.fail();if(S.screen==='home')go('offline');else if(S.screen==='servers'){S.srvErr=true;render()}});
+addEventListener('online',()=>{if(S.screen==='offline')goRoot('home')});
+addEventListener('pagehide',()=>save(true));
+/* 1-second tick: connection timer + free data usage */
+setInterval(()=>{
+  if(S.vpn!=='on')return;
+  if(isFree()){S.data=Math.max(0,S.data-10);const d=$('#dleft');if(d)d.textContent=Math.round(S.data)+' MB left today';
+    if(S.data<=0){VPN.disconnect(false);return openOv('limit')}}
+  const t=$('#timer');if(t)t.textContent='Connected · '+fmt(Date.now()-S.since);
+  save();
+},1000);
+
+/* ================= boot ================= */
+if(!SC[S.screen])S.screen='splash';
+if(S.screen==='splash'){
+  history.replaceState({d:0},'','#splash');render();
+  later('splash',()=>goRoot('onboard'),2900);
+}else if(!allowed(S.screen)){
+  S.hist=[];S.screen=fallback();history.replaceState({d:0},'','#'+S.screen);render();
+}else{
+  S.hist=S.hist.filter(allowed);
+  history.replaceState({d:0},'','#'+S.screen);
+  for(let i=1;i<=S.hist.length;i++)history.pushState({d:i},'','#'+S.screen);
+  render();
+}
+</script>
+</body>
+</html>
